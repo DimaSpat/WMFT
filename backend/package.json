@@ -8,5 +8,8 @@
     "@types/bun": "^1.2.19",
     "@types/node": "^24.0.13",
     "bun-types": "^1.2.18"
+  },
+  "scripts": {
+    "dev": "bun --hot ./src/index.ts --env-file=.env"
   }
 }

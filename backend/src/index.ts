@@ -28,7 +28,7 @@ app.route('/auth', authRouter);
 start().then(() => console.log("Server started successfully"));
 
 export default {
-    port: process.env.PORT || 5000,
+    port: process.env.PORT,
     fetch: app.fetch,
 }
 
