@@ -4,13 +4,36 @@ import { redisDB } from "../index";
 
 const authRouter = new Hono();
 
+async function findUserByEmail(email: string): Promise<{ user:any | null; exists: boolean}> {
+    try {
+        const userData:string|Buffer = await redisDB.get(`user:${email}`);
+
+        if (!userData) {
+            return {
+                user:null,
+                exists: false
+            };
+        }
+
+        return {
+            user: JSON.parse((typeof userData === 'string' ? userData : userData.toString())),
+            exists: true
+        }
+    } catch (error) {
+        console.error(`Error finding user by email ${email}:`, error);
+        throw new Error(`Error finding user by email ${email}: ${error}`);
+    }
+}
+
+
+
 authRouter.use(
     '/google',
     googleAuth({
         client_id: Bun.env.GOOGLE_ID || 'your-client-id',
         client_secret: Bun.env.GOOGLE_SECRET || 'your-client-secret',
         scope: ['openid', 'email', 'profile'],
-        redirect_uri: 'http://localhost:5000/auth/google',
+        redirect_uri: 'http://localhost:5000/api/auth/google',
     })
 );
 
@@ -30,24 +53,32 @@ authRouter.get('/google', async (c) => {
     );
 });
 
+
+
 authRouter.post("/register", async (c) => {
     const { email, password } = await c.req.json();
-    const exists = await redisDB.get(`user:${email}`);
+    const { exists } = await findUserByEmail(email);
 
     if (exists) {
-        return c.json({ success: false, message: "User already exists." }, 400);
+        return c.json({
+            success: false,
+            message: "User already exists",
+        });
     }
 
-    const user = {
+    const newUser = {
         email,
         password,
         coins: 0,
         resources: {},
     };
 
-    await redisDB.set(`user:${email}`, JSON.stringify(user));
+    await redisDB.set(`user:${email}`, JSON.stringify(newUser));
 
-    return c.json({ success: true, message: "Registered successfully!" });
+    return c.json({
+        success: true,
+        message: "Registered successfully!"
+    }, 201);
 });
 
 authRouter.post("/login", async (c) => {
@@ -61,28 +92,15 @@ authRouter.post("/login", async (c) => {
     }
 
     try {
-        // Get all user keys from Redis
-        const userKeys = await redisDB.keys('user:*');
-
-        // Find the specific user
-        let userFound = null;
-        for (const key of userKeys) {
-            const userData:any = await redisDB.get(key);
-            if (userData) {
-                const user = JSON.parse(userData);
-                if (user.email === email) {
-                    userFound = user;
-                    break;
-                }
-            }
-        }
-        if (!userFound) {
+        const { user } = await findUserByEmail(email);
+        if (!user) {
             return c.json(
                 { success: false, message: "User not found" },
                 404
             );
         }
-        if (userFound.password !== password) {
+
+        if (user.password !== password) {
             return c.json(
                 { success: false, message: "Invalid credentials" },
                 401
@@ -92,13 +110,14 @@ authRouter.post("/login", async (c) => {
         return c.json({
             success: true,
             message: "Login successful",
-        });
+        }, 200);
+
     } catch (error) {
         console.error("Login error:", error);
-        return c.json(
-            { success: false, message: "Login failed" },
-            500
-        );
+        return c.json({
+            success: false,
+            message: "Login failed"
+        },500);
     }
 });
 export { authRouter };

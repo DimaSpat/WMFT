@@ -11,52 +11,93 @@ export const head: DocumentHead = {
     ]
 }
 
+interface AuthResult {
+    success: boolean;
+    message: string;
+}
+
+interface FormDataInput {
+    email: string;
+    password: string;
+    passwordCheck?: string;
+}
+
+const API_ENDPOINTS = {
+    BASE_AUTH: `${import.meta.env.VITE_API_BASE_URL}/auth`,
+    get REGISTER() { return `${this.BASE_AUTH}/register` },
+    get LOGIN() { return `${this.BASE_AUTH}/login` },
+    get GOOGLE() { return `${this.BASE_AUTH}/google` }
+} as const;
+
+
+const HTTP_HEADERS = {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json',
+} as const;
+
+const validateForm:any = (form:HTMLFormElement|undefined, isSigning:boolean):AuthResult|null => {
+    if (isSigning && form?.password.value !== form?.passwordCheck.value) {
+        return {
+            success: false,
+            message: "Passwords do not match",
+        };
+    }
+
+    return null;
+};
+
+const handleAuthError:any = (error: unknown): AuthResult => ({
+    success: false,
+    message: "An error occurred while processing your request."
+});
+
+
 export default component$(():JSXOutput => {
     const isSigning:Signal<boolean> = useSignal(true);
     const isLoading:Signal<boolean> = useSignal(false);
     const formRef:Signal<HTMLFormElement | undefined> = useSignal<HTMLFormElement>();
     const result:Signal = useSignal<any>(null);
 
-    const changeAuthState = $(():void => {
+    const changeAuthState:any = $(():void => {
         isSigning.value = !isSigning.value;
         console.log(formRef);
+        console.log(API_ENDPOINTS.LOGIN);
+        console.log(API_ENDPOINTS.REGISTER);
+        console.log(API_ENDPOINTS.GOOGLE);
     });
 
-    const submitForm:any = $(async ():Promise<any> => {
+    const submitForm:any = $(async (): Promise<void> => {
         isLoading.value = true;
         result.value = null;
 
-        if (isSigning.value) {
-            if (formRef.value?.password.value !== formRef.value?.passwordCheck.value) {
-                result.value = { error: "Passwords do not match." };
-                isLoading.value = false;
-                return;
-            }
+        console.log(import.meta.env.VITE_API_BASE_URL);
+
+        const validationError:AuthResult|null = validateForm(formRef.value, isSigning.value);
+        if (validationError) {
+            result.value = validationError;
+            isLoading.value = false;
+            return;
         }
 
         try {
-            const formData:FormData = new FormData(formRef.value);
-            const data = Object.fromEntries(formData);
+            const data = Object.fromEntries(new FormData(formRef.value)) as unknown as FormDataInput;
 
             if ('passwordCheck' in data) {
                 delete data.passwordCheck;
             }
 
-            const response = await fetch(`http://localhost:5000/auth/${isSigning.value ? 'register' : 'login'}`, {
-                method: "POST",
+            const endpoint = isSigning.value ? API_ENDPOINTS.REGISTER : API_ENDPOINTS.LOGIN;
+            const response = await fetch(endpoint, {
+               method: "POST",
                 body: JSON.stringify(data),
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                },
+                headers: HTTP_HEADERS,
             });
 
-            result.value = await response.json();
+            result.value = await response.json() as AuthResult;
         } catch (error) {
-            result.value = { error: 'An error occurred while processing your request.' };
+            result.value = handleAuthError(error);
         } finally {
             isLoading.value = false;
-            result.value = null;
         }
     });
 
@@ -118,9 +159,9 @@ export default component$(():JSXOutput => {
                                     {result.value && (
                                         <div>
                                             <p style={{
-                                                color: result.value?.error ? "red" : result.value?.success ? "green" : "black",
+                                                color: !result.value?.success ? "red" : result.value?.success ? "green" : "black",
                                             }}>
-                                                {String(Object.values(result.value)[Object.values(result.value).length-1])}
+                                                {result.value?.message}
                                             </p>
                                         </div>
                                     )}
@@ -140,9 +181,9 @@ export default component$(():JSXOutput => {
                                     {result.value && (
                                         <div>
                                             <p style={{
-                                                color: result.value?.error ? "red" : result.value?.success ? "green" : "black",
+                                                color: !result.value?.success ? "red" : result.value?.success ? "green" : "black",
                                             }}>
-                                                {String(Object.values(result.value)[Object.values(result.value).length-1])}
+                                                {result.value?.message}
                                             </p>
                                         </div>
                                     )}
@@ -151,7 +192,7 @@ export default component$(():JSXOutput => {
                         }
                     </div>
                     <div>
-                        <a href="http://localhost:5000/auth/google">
+                        <a href={API_ENDPOINTS.GOOGLE}>
                             <button style={{
                                 background: "#4285F4",
                                 color: "white",
