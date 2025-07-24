@@ -6,7 +6,7 @@ const authRouter = new Hono();
 
 async function findUserByEmail(email: string): Promise<{ user:any | null; exists: boolean}> {
     try {
-        const userData:string|Buffer = await redisDB.get(`user:${email}`);
+        const userData:string|Buffer = await redisDB.get(`user:${email.toLowerCase()}`);
 
         if (!userData) {
             return {
@@ -38,19 +38,20 @@ authRouter.use(
 );
 
 authRouter.get('/google', async (c) => {
-    const user = c.get('user-google');
-
+    const userGoogle = c.get('user-google');
+    const { user, exists } = await findUserByEmail(userGoogle.email);
     const userInfo = {
-        email: user.email,
-        password: user.id,
-        coins: 0,
-        resources: {},
+        email: userGoogle.email.toLowerCase(),
+        password: userGoogle.id,
+        coins: user ? user.coins : 0,
+        resources: user ? user.resources : {},
     };
-    await redisDB.set(`user:${user.email}`, JSON.stringify(userInfo));
 
-    return c.redirect(
-        `http://localhost:5173/?user=${encodeURIComponent(JSON.stringify(userInfo))}`
-    );
+    if (!exists) {
+        await redisDB.set(`user:${userGoogle.email}`, JSON.stringify(userInfo));
+    }
+
+    return c.redirect(`http://localhost:5173/?user=${encodeURIComponent(JSON.stringify(userInfo))}`);
 });
 
 
@@ -67,13 +68,13 @@ authRouter.post("/register", async (c) => {
     }
 
     const newUser = {
-        email,
+        email: email.toLowerCase(),
         password,
         coins: 0,
         resources: {},
     };
 
-    await redisDB.set(`user:${email}`, JSON.stringify(newUser));
+    await redisDB.set(`user:${newUser.email}`, JSON.stringify(newUser));
 
     return c.json({
         success: true,
