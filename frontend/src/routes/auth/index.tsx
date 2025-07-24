@@ -60,10 +60,8 @@ export default component$(():JSXOutput => {
 
     const changeAuthState:any = $(():void => {
         isSigning.value = !isSigning.value;
-        console.log(formRef);
-        console.log(API_ENDPOINTS.LOGIN);
-        console.log(API_ENDPOINTS.REGISTER);
-        console.log(API_ENDPOINTS.GOOGLE);
+        formRef.value?.reset();
+        result.value = null;
     });
 
     const submitForm:any = $(async (): Promise<void> => {
@@ -88,17 +86,25 @@ export default component$(():JSXOutput => {
 
             const endpoint = isSigning.value ? API_ENDPOINTS.REGISTER : API_ENDPOINTS.LOGIN;
             const response = await fetch(endpoint, {
-               method: "POST",
+                method: "POST",
                 body: JSON.stringify(data),
                 headers: HTTP_HEADERS,
             });
 
-            result.value = await response.json() as AuthResult;
+            const responseData = await response.json();
+
+            if (responseData.success) {
+                // Make sure we're using the user data from the response
+                window.location.href = `/?user=${encodeURIComponent(JSON.stringify(responseData.user))}`;
+            } else {
+                result.value = responseData;
+            }
         } catch (error) {
             result.value = handleAuthError(error);
         } finally {
             isLoading.value = false;
         }
+
     });
 
     return (

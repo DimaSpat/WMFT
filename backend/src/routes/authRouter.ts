@@ -49,7 +49,7 @@ authRouter.get('/google', async (c) => {
     await redisDB.set(`user:${user.email}`, JSON.stringify(userInfo));
 
     return c.redirect(
-        `http://localhost:5173/?user=${encodeURIComponent(JSON.stringify(user))}`
+        `http://localhost:5173/?user=${encodeURIComponent(JSON.stringify(userInfo))}`
     );
 });
 
@@ -77,7 +77,8 @@ authRouter.post("/register", async (c) => {
 
     return c.json({
         success: true,
-        message: "Registered successfully!"
+        message: "Registered successfully!",
+        user: newUser
     }, 201);
 });
 
@@ -110,6 +111,7 @@ authRouter.post("/login", async (c) => {
         return c.json({
             success: true,
             message: "Login successful",
+            user: user,
         }, 200);
 
     } catch (error) {

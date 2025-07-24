@@ -10,11 +10,6 @@ export default component$(() => {
 
     return (
         <div>
-            {user.value && (
-                <>
-                    hello, {user.value.name}!
-                </>
-            )}
             <main>
                 <Slot></Slot>
             </main>
