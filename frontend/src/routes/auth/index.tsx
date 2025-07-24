@@ -14,6 +14,11 @@ export const head: DocumentHead = {
 interface AuthResult {
     success: boolean;
     message: string;
+    user?: {
+        email: string;
+        coins: number;
+        resources: any[];
+    };
 }
 
 interface FormDataInput {
