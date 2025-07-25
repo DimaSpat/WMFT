@@ -17,7 +17,6 @@ export default component$(() => {
 
     return (
         <>
-            <Header />
             <h1>Home</h1>
             {userInfo.value && (
                 <div>

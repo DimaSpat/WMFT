@@ -1,5 +1,5 @@
 import { component$, $, JSXOutput, Signal, useSignal } from "@builder.io/qwik";
-import { DocumentHead } from "@builder.io/qwik-city";
+import {DocumentHead, useNavigate} from "@builder.io/qwik-city";
 
 export const head: DocumentHead = {
     title: "Authentication",
@@ -19,6 +19,8 @@ interface AuthResult {
         coins: number;
         resources: any[];
     };
+    payload?: object;
+    token?: string;
 }
 
 interface FormDataInput {
@@ -28,7 +30,7 @@ interface FormDataInput {
 }
 
 const API_ENDPOINTS = {
-    BASE_AUTH: `${import.meta.env.VITE_API_BASE_URL}/auth`,
+    BASE_AUTH: `${import.meta.env.VITE_API_BASE_URL}/api/auth`,
     get REGISTER() { return `${this.BASE_AUTH}/register` },
     get LOGIN() { return `${this.BASE_AUTH}/login` },
     get GOOGLE() { return `${this.BASE_AUTH}/google` }
@@ -62,6 +64,7 @@ export default component$(():JSXOutput => {
     const isLoading:Signal<boolean> = useSignal(false);
     const formRef:Signal<HTMLFormElement | undefined> = useSignal<HTMLFormElement>();
     const result:Signal = useSignal<any>(null);
+    const nav = useNavigate();
 
     const changeAuthState:any = $(():void => {
         isSigning.value = !isSigning.value;
@@ -92,6 +95,7 @@ export default component$(():JSXOutput => {
             const endpoint = isSigning.value ? API_ENDPOINTS.REGISTER : API_ENDPOINTS.LOGIN;
             const response = await fetch(endpoint, {
                 method: "POST",
+                credentials: 'include',
                 body: JSON.stringify(data),
                 headers: HTTP_HEADERS,
             });
@@ -99,8 +103,7 @@ export default component$(():JSXOutput => {
             const responseData = await response.json();
 
             if (responseData.success) {
-                // Make sure we're using the user data from the response
-                window.location.href = `/?user=${encodeURIComponent(JSON.stringify(responseData.user))}`;
+                await nav('/');
             } else {
                 result.value = responseData;
             }

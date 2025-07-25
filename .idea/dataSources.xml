@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
+    <data-source source="LOCAL" name="0@redis-18939.c85.us-east-1-2.ec2.redns.redis-cloud.com" uuid="9c566c63-4a9d-486f-b301-06fba2daa0d2">
+      <driver-ref>redis</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>jdbc.RedisDriver</jdbc-driver>
+      <jdbc-url>jdbc:redis://redis-18939.c85.us-east-1-2.ec2.redns.redis-cloud.com:18939/0</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+  </component>
+</project>

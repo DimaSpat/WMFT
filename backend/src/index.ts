@@ -1,6 +1,8 @@
 import { Hono } from "hono";
 import { logger } from "hono/logger";
 import { cors } from "hono/cors";
+import { bearerAuth } from "hono/bearer-auth";
+import { getCookie } from "hono/cookie";
 import { createClient } from "redis";
 
 import { authRouter } from "./routes/authRouter";
@@ -27,6 +29,15 @@ app.use('/*', cors({
 app.use(logger());
 
 app.route('/api/auth', authRouter);
+app.use('/api/user/*', bearerAuth({
+    verifyToken: async (token:string, c:any):Promise<boolean> => {
+        return token === getCookie(c, 'token');
+    }
+}));
+
+app.get('/api/user/test', (c) => {
+    return c.json({ message: 'Hello, authenticated user!' });
+});
 
 start().then(() => console.log("Server started successfully"));
 

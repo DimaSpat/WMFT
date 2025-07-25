@@ -1,11 +1,14 @@
 import { Hono } from 'hono';
 import { googleAuth } from '@hono/oauth-providers/google';
 import { redisDB } from "../index";
+import {sign, verify} from 'hono/jwt';
+import {getCookie, setCookie} from "hono/cookie";
 
 const authRouter = new Hono();
 
-async function findUserByEmail(email: string): Promise<{ user:any | null; exists: boolean}> {
+async function findUserByEmail(email: string | unknown): Promise<{ user:any | null; exists: boolean}> {
     try {
+        // @ts-ignore
         const userData:string|Buffer = await redisDB.get(`user:${email.toLowerCase()}`);
 
         if (!userData) {
@@ -25,7 +28,10 @@ async function findUserByEmail(email: string): Promise<{ user:any | null; exists
     }
 }
 
-
+const sanitizeUser = (user: any) => {
+    const { password, ...safeUser } = user;
+    return safeUser;
+}
 
 authRouter.use(
     '/google',
@@ -51,10 +57,22 @@ authRouter.get('/google', async (c) => {
         await redisDB.set(`user:${userGoogle.email}`, JSON.stringify(userInfo));
     }
 
-    return c.redirect(`http://localhost:5173/?user=${encodeURIComponent(JSON.stringify(userInfo))}`);
+    const payload = {
+        email: userInfo.email,
+        exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 30), // 30 days
+    };
+
+    const token:string = await sign(payload, Bun.env.JWT_SECRET || '');
+    setCookie(c, 'token', token, {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 30,
+        path: '/',
+    });
+
+    return c.redirect(`http://localhost:5173/`);
 });
-
-
 
 authRouter.post("/register", async (c) => {
     const { email, password } = await c.req.json();
@@ -79,7 +97,7 @@ authRouter.post("/register", async (c) => {
     return c.json({
         success: true,
         message: "Registered successfully!",
-        user: newUser
+        user: sanitizeUser(newUser)
     }, 201);
 });
 
@@ -109,10 +127,34 @@ authRouter.post("/login", async (c) => {
             );
         }
 
-        return c.json({
+        const payload = {
+            email: user.email,
+            exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 30),
+        }
+
+        const token:string = await sign(payload, Bun.env.JWT_SECRET || '');
+        setCookie(c, 'token', token, {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'lax',
+            maxAge: 60 * 60 * 24 * 30,
+            path: '/',
+        });
+
+        console.log({
             success: true,
             message: "Login successful",
             user: user,
+            payload: payload,
+            token: token,
+        });
+
+        return c.json({
+            success: true,
+            message: "Login successful",
+            user: sanitizeUser(user),
+            payload: payload,
+            token: token,
         }, 200);
 
     } catch (error) {
@@ -123,4 +165,33 @@ authRouter.post("/login", async (c) => {
         },500);
     }
 });
+
+authRouter.get("/me", async (c) => {
+    try {
+        const token = getCookie(c, 'token');
+        if (!token) {
+            return c.json({ success: false, message: "Unauthorized" }, 401);
+        }
+
+        const payload = await verify(token, Bun.env.JWT_SECRET || '');
+        if (!payload || !payload.email) {
+            return c.json({ success: false, message: "Unauthorized, invalid token" }, 401);
+        }
+
+        const { user } = await findUserByEmail(payload.email);
+        if (!user) {
+            return c.json({ success: false, message: "User not found" }, 404);
+        }
+
+        return c.json({
+            success: true,
+            user: sanitizeUser(user),
+        }, 200);
+    } catch (error) {
+        console.error("Error fetching user data:", error);
+        return c.json({ success: false, message: "Internal server error" }, 500);
+    }
+});
+
+
 export { authRouter };
