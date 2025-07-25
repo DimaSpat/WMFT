@@ -141,14 +141,6 @@ authRouter.post("/login", async (c) => {
             path: '/',
         });
 
-        console.log({
-            success: true,
-            message: "Login successful",
-            user: user,
-            payload: payload,
-            token: token,
-        });
-
         return c.json({
             success: true,
             message: "Login successful",
@@ -165,6 +157,22 @@ authRouter.post("/login", async (c) => {
         },500);
     }
 });
+
+authRouter.post("/logout", async (c) => {
+    setCookie(c, 'token', '', {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        maxAge: 0,
+        path: '/',
+    });
+
+    return c.json({
+        success: true,
+        message: "Logged out successfully"
+    });
+});
+
 
 authRouter.get("/me", async (c) => {
     try {

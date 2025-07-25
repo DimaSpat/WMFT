@@ -72,11 +72,10 @@ export default component$(():JSXOutput => {
         result.value = null;
     });
 
-    const submitForm:any = $(async (): Promise<void> => {
+    const submitForm:any = $(async (e:any): Promise<void> => {
+        e.preventDefault();
         isLoading.value = true;
         result.value = null;
-
-        console.log(import.meta.env.VITE_API_BASE_URL);
 
         const validationError:AuthResult|null = validateForm(formRef.value, isSigning.value);
         if (validationError) {
@@ -103,7 +102,12 @@ export default component$(():JSXOutput => {
             const responseData = await response.json();
 
             if (responseData.success) {
-                await nav('/');
+                if (isSigning.value) {
+                    window.location.href = '/';
+                } else {
+                    changeAuthState();
+                    result.value = responseData;
+                }
             } else {
                 result.value = responseData;
             }
@@ -112,8 +116,8 @@ export default component$(():JSXOutput => {
         } finally {
             isLoading.value = false;
         }
-
     });
+
 
     return (
         <div style={{

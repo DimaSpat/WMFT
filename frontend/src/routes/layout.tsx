@@ -1,3 +1,4 @@
+
 import {component$, Slot, useStore, useVisibleTask$} from "@builder.io/qwik";
 import {useNavigate} from "@builder.io/qwik-city";
 import {Header} from "~/components/header/header";
@@ -12,13 +13,16 @@ interface UserState {
 }
 
 export default component$(() => {
-    const store = useStore({
+    const store = useStore<UserState>({
         user: null,
         isLoading: true,
     });
     const nav = useNavigate();
 
-    useVisibleTask$(async () => {
+    // Add trackBy to ensure the task runs when auth state changes
+    useVisibleTask$(async ({ track }) => {
+        track(() => window.location.pathname);
+
         try {
             const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/me`, {
                 credentials: 'include',
@@ -27,11 +31,15 @@ export default component$(() => {
 
             if (data.success) {
                 store.user = data.user;
-            } else if (window.location.pathname !== '/auth') {
-                await nav('/auth');
+            } else {
+                store.user = null;
+                if (window.location.pathname !== '/auth') {
+                    await nav('/auth');
+                }
             }
         } catch (error) {
             console.error("Error fetching user data:", error);
+            store.user = null;
             if (window.location.pathname !== '/auth') {
                 await nav('/auth');
             }
@@ -39,7 +47,6 @@ export default component$(() => {
             store.isLoading = false;
         }
     });
-
 
     return (
         <div>
@@ -55,4 +62,4 @@ export default component$(() => {
             )}
         </div>
     )
-})
+});
