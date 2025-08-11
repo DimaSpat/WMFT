@@ -33,7 +33,8 @@ const API_ENDPOINTS = {
     BASE_AUTH: `${import.meta.env.VITE_API_BASE_URL}/api/auth`,
     get REGISTER() { return `${this.BASE_AUTH}/register` },
     get LOGIN() { return `${this.BASE_AUTH}/login` },
-    get GOOGLE() { return `${this.BASE_AUTH}/google` }
+    get GOOGLE() { return `${this.BASE_AUTH}/google` },
+    get TELEGRAM() { return `${this.BASE_AUTH}/telegram` },
 } as const;
 
 
@@ -131,6 +132,7 @@ export default component$(():JSXOutput => {
                 border: "1px solid black",
                 overflow: "hidden",
                 width: "25%",
+                minWidth: "20rem",
             }}>
                 <div style={{
                     display: "grid",
@@ -156,9 +158,7 @@ export default component$(():JSXOutput => {
                         }}
                     >Log In</button>
                 </div>
-                <div style={{
-                    padding: "2rem",
-                }}>
+                <div>
                     <div style={{
                         borderBottom: "2px dotted black",
                     }}>
@@ -212,15 +212,28 @@ export default component$(():JSXOutput => {
                     <div>
                         <a href={API_ENDPOINTS.GOOGLE}>
                             <button style={{
-                                background: "#4285F4",
+                                background: "#0F9D58",
                                 color: "white",
                                 border: "none",
                                 padding: "0.5rem 1rem",
                                 borderRadius: "0.5rem",
                                 cursor: "pointer",
-                                marginTop: "0.5rem",
                             }}>
                                 Continue with Google
+                            </button>
+                        </a>
+                        <a href={API_ENDPOINTS.TELEGRAM}>
+                            <button
+                                style={{
+                                    background: "#229ED9",
+                                    color: "white",
+                                    border: "none",
+                                    padding: "0.5rem 1rem",
+                                    borderRadius: "0.5rem",
+                                    cursor: "pointer",
+                                }}
+                            >
+                                Continue with Telegram
                             </button>
                         </a>
                     </div>

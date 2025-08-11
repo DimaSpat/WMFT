@@ -35,14 +35,16 @@ app.use('/api/user/*', bearerAuth({
     }
 }));
 
-app.get('/api/user/test', (c) => {
-    return c.json({ message: 'Hello, authenticated user!' });
+app.post('/api/test', async (c:any) => {
+   const { message } = await c.req.json();
+
+    return c.json({ message: 'Test endpoint hit successfully' }, 200);
 });
 
 start().then(() => console.log("Server started successfully"));
 
 export default {
-    port: process.env.PORT,
+    port: Bun.env.PORT,
     fetch: app.fetch,
 }
 

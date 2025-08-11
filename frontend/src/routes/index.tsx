@@ -1,6 +1,5 @@
 import { component$, useVisibleTask$, useSignal } from "@builder.io/qwik";
 import { DocumentHead } from "@builder.io/qwik-city";
-import { Header } from "~/components/header/header";
 
 export default component$(() => {
     const userInfo = useSignal<any>(undefined);

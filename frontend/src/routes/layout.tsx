@@ -1,4 +1,3 @@
-
 import {component$, Slot, useStore, useVisibleTask$} from "@builder.io/qwik";
 import {useNavigate} from "@builder.io/qwik-city";
 import {Header} from "~/components/header/header";
@@ -24,6 +23,25 @@ export default component$(() => {
         track(() => window.location.pathname);
 
         try {
+            const localToken = localStorage.getItem('auth_token');
+
+            if (localToken) {
+                localStorage.removeItem('auth_token');
+
+                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/telegram/set-cookie`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ token: localToken }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to set cookie');
+                }
+            }
+
             const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/me`, {
                 credentials: 'include',
             });

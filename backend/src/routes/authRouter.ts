@@ -3,6 +3,8 @@ import { googleAuth } from '@hono/oauth-providers/google';
 import { redisDB } from "../index";
 import {sign, verify} from 'hono/jwt';
 import {getCookie, setCookie} from "hono/cookie";
+import {auth} from "hono/dist/types/utils/basic-auth";
+import {JWTPayload} from "hono/dist/types/utils/jwt/types";
 
 const authRouter = new Hono();
 
@@ -73,6 +75,109 @@ authRouter.get('/google', async (c) => {
 
     return c.redirect(`http://localhost:5173/`);
 });
+
+authRouter.get('/telegram', async (c) => {
+    const botUsername = Bun.env.BOT_USERNAME || 'WMFT_bot';
+    if (!botUsername) {
+        return c.json({ success: false, message: "Bot username not configured" }, 500);
+    }
+
+    return c.redirect(`https://t.me/${botUsername}`);
+});
+
+authRouter.post('/telegram/verify', async (c) => {
+    try {
+        const { telegramId, username, firstName, lastName } = await c.req.json();
+
+        // @ts-ignore
+        const existingUser:string = await redisDB.get(`telegram:${telegramId}`);
+
+        if (existingUser) {
+            const userData = JSON.parse(existingUser);
+            return c.json({
+                success: true,
+                isNewUser: false,
+                user: userData
+            });
+        }
+
+        const newUser = {
+            telegramId,
+            username: username || `user_${telegramId}`,
+            firstName,
+            lastName,
+            coins: 0,
+            resources: [],
+            createdAt: new Date().toISOString()
+        };
+
+        await redisDB.set(`telegram:${telegramId}`, JSON.stringify(newUser));
+
+        if (username) {
+            await redisDB.set(`username:${username}`, telegramId);
+        }
+
+        return c.json({
+            success: true,
+            isNewUser: true,
+            user: newUser
+        });
+
+    } catch (error) {
+        console.error('Telegram verification error:', error);
+        return c.json({
+            success: false,
+            message: 'Error during verification process'
+        }, 500);
+    }
+});
+
+authRouter.post('/telegram/complete-auth', async (c) => {
+   try {
+       const { telegramId } = await c.req.json();
+       
+       // @ts-ignore
+       const userData:string = await redisDB.get(`telegram:${telegramId}`);
+
+       if (!userData) {
+           return c.json({
+               success: false,
+               message: "User not found"
+           }, 404);
+       }
+
+       const user = JSON.parse(userData);
+
+       const payload = {
+           telegramId,
+           username: user.username,
+           exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 30),
+       };
+
+       const token = await sign(payload, Bun.env.JWT_SECRET || '');
+
+       setCookie(c, 'token', token, {
+           httpOnly: true,
+           secure: false,
+           sameSite: 'lax',
+           maxAge: 60 * 60 * 24 * 30,
+           path: '/',
+       });
+
+       return c.json({
+           success: true,
+           token,
+           redirectUrl: 'http://localhost:5173/'
+       });
+   } catch (error) {
+       console.error('Complete auth error:', error);
+       return c.json({
+           success: false,
+           message: 'Error completing authentication'
+       }, 500);
+   }
+});
+
 
 authRouter.post("/register", async (c) => {
     const { email, password } = await c.req.json();
@@ -174,32 +279,72 @@ authRouter.post("/logout", async (c) => {
 });
 
 
-authRouter.get("/me", async (c) => {
+// Add this route to your auth router
+
+authRouter.get('/me', async (c) => {
+  try {
+    const authHeader = c.req.header('authorization');
+    const headerToken = authHeader?.toLowerCase().startsWith('bearer ')
+      ? authHeader.slice(7)
+      : undefined;
+
+    const token =
+      headerToken ||
+      getCookie(c, 'token') ||
+      getCookie(c, 'auth_token');
+
+    if (!token) {
+      return c.json({ success: false, message: 'Unauthorized' }, 401);
+    }
+
+    const payload = await verify(token, Bun.env.JWT_SECRET || '');
+    const email = (payload as JWTPayload & { email?: string }).email;
+
+    if (!email) {
+      return c.json({ success: false, message: 'Invalid token' }, 401);
+    }
+
+    const { user, exists } = await findUserByEmail(email);
+    if (!exists || !user) {
+      return c.json({ success: false, message: 'User not found' }, 404);
+    }
+
+    return c.json({
+      success: true,
+      user: sanitizeUser(user),
+    });
+  } catch {
+    return c.json({ success: false, message: 'Unauthorized' }, 401);
+  }
+});
+
+authRouter.post("/met", async (c) => {
     try {
-        const token = getCookie(c, 'token');
+        const { token } = await c.req.json();
+
         if (!token) {
             return c.json({ success: false, message: "Unauthorized" }, 401);
         }
 
-        const payload = await verify(token, Bun.env.JWT_SECRET || '');
-        if (!payload || !payload.email) {
-            return c.json({ success: false, message: "Unauthorized, invalid token" }, 401);
+        const payload:JWTPayload = await verify(token, Bun.env.JWT_SECRET || '');
+
+        if (payload.telegramId) {
+            // @ts-ignore
+            const userData:string = await redisDB.get(`telegram:${payload.telegramId}`);
+            if (!userData) {
+                return c.json({ success: false, message: "User not found" }, 404);
+            }
+            return c.json({
+                success: true,
+                user: JSON.parse(userData),
+            });
         }
 
-        const { user } = await findUserByEmail(payload.email);
-        if (!user) {
-            return c.json({ success: false, message: "User not found" }, 404);
-        }
-
-        return c.json({
-            success: true,
-            user: sanitizeUser(user),
-        }, 200);
+        return c.json({ success: false, message: "Invalid token payload" }, 401);
     } catch (error) {
         console.error("Error fetching user data:", error);
         return c.json({ success: false, message: "Internal server error" }, 500);
     }
 });
-
 
 export { authRouter };
