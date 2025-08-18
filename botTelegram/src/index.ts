@@ -4,12 +4,11 @@ config();
 
 // @ts-ignore
 import TelegramBot from 'node-telegram-bot-api';
-import { BitlyClient } from "bitly";
 
 interface UserSession {
     step: 'INITIAL' | 'USERNAME_PROMPT' | 'COMPLETE';
     telegramId: number;
-    username: string;
+    email: string;
     firstName: string;
     lastName?: string;
 }
@@ -18,7 +17,6 @@ const userSessions = new Map<number, UserSession>();
 
 // Initialize the bot
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
-const bitly = new BitlyClient(process.env.BITLY_ACCESS_TOKEN);
 
 // Command handler for /start
 bot.onText(/\/start/, async (msg: any): Promise<void> => {

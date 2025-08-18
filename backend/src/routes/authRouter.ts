@@ -8,7 +8,7 @@ import {JWTPayload} from "hono/dist/types/utils/jwt/types";
 
 const authRouter = new Hono();
 
-async function findUserByEmail(email: string | unknown): Promise<{ user:any | null; exists: boolean}> {
+async function findUserFromDB(email: string | unknown): Promise<{ user:any | null; exists: boolean}> {
     try {
         // @ts-ignore
         const userData:string|Buffer = await redisDB.get(`user:${email.toLowerCase()}`);
@@ -25,8 +25,8 @@ async function findUserByEmail(email: string | unknown): Promise<{ user:any | nu
             exists: true
         }
     } catch (error) {
-        console.error(`Error finding user by email ${email}:`, error);
-        throw new Error(`Error finding user by email ${email}: ${error}`);
+        console.error(`Error finding user of type by email ${email}:`, error);
+        throw new Error(`Error finding user of type by email ${email}: ${error}`);
     }
 }
 
@@ -47,7 +47,7 @@ authRouter.use(
 
 authRouter.get('/google', async (c) => {
     const userGoogle = c.get('user-google');
-    const { user, exists } = await findUserByEmail(userGoogle.email);
+    const { user, exists } = await findUserFromDB(userGoogle.email);
     const userInfo = {
         email: userGoogle.email.toLowerCase(),
         password: userGoogle.id,
@@ -90,7 +90,7 @@ authRouter.post('/telegram/verify', async (c) => {
         const { telegramId, username, firstName, lastName } = await c.req.json();
 
         // @ts-ignore
-        const existingUser:string = await redisDB.get(`telegram:${telegramId}`);
+        const existingUser:string = await redisDB.get(`user:${telegramId}`);
 
         if (existingUser) {
             const userData = JSON.parse(existingUser);
@@ -101,21 +101,24 @@ authRouter.post('/telegram/verify', async (c) => {
             });
         }
 
+        // const newUser = {
+        //     telegramId,
+        //     username: username || `user_${telegramId}`,
+        //     firstName,
+        //     lastName,
+        //     coins: 0,
+        //     resources: [],
+        //     createdAt: new Date().toISOString()
+        // };
+
         const newUser = {
-            telegramId,
-            username: username || `user_${telegramId}`,
-            firstName,
-            lastName,
+            email: telegramId,
+            password: telegramId,
             coins: 0,
             resources: [],
-            createdAt: new Date().toISOString()
-        };
-
-        await redisDB.set(`telegram:${telegramId}`, JSON.stringify(newUser));
-
-        if (username) {
-            await redisDB.set(`username:${username}`, telegramId);
         }
+
+        await redisDB.set(`user:${telegramId}`, JSON.stringify(newUser));
 
         return c.json({
             success: true,
@@ -137,7 +140,7 @@ authRouter.post('/telegram/complete-auth', async (c) => {
        const { telegramId } = await c.req.json();
        
        // @ts-ignore
-       const userData:string = await redisDB.get(`telegram:${telegramId}`);
+       const userData:string = await redisDB.get(`user:${telegramId}`);
 
        if (!userData) {
            return c.json({
@@ -181,7 +184,7 @@ authRouter.post('/telegram/complete-auth', async (c) => {
 
 authRouter.post("/register", async (c) => {
     const { email, password } = await c.req.json();
-    const { exists } = await findUserByEmail(email);
+    const { exists } = await findUserFromDB(email);
 
     if (exists) {
         return c.json({
@@ -217,7 +220,7 @@ authRouter.post("/login", async (c) => {
     }
 
     try {
-        const { user } = await findUserByEmail(email);
+        const { user } = await findUserFromDB(email);
         if (!user) {
             return c.json(
                 { success: false, message: "User not found" },
@@ -304,7 +307,7 @@ authRouter.get('/me', async (c) => {
       return c.json({ success: false, message: 'Invalid token' }, 401);
     }
 
-    const { user, exists } = await findUserByEmail(email);
+    const { user, exists } = await findUserFromDB(email);
     if (!exists || !user) {
       return c.json({ success: false, message: 'User not found' }, 404);
     }
@@ -330,7 +333,7 @@ authRouter.post("/met", async (c) => {
 
         if (payload.telegramId) {
             // @ts-ignore
-            const userData:string = await redisDB.get(`telegram:${payload.telegramId}`);
+            const userData:string = await redisDB.get(`user:${payload.telegramId}`);
             if (!userData) {
                 return c.json({ success: false, message: "User not found" }, 404);
             }
