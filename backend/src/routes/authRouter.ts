@@ -150,6 +150,7 @@ authRouter.post('/telegram/complete-auth', async (c) => {
        }
 
        const user = JSON.parse(userData);
+       console.log(user);
 
        const payload = {
            telegramId,
@@ -158,6 +159,7 @@ authRouter.post('/telegram/complete-auth', async (c) => {
        };
 
        const token = await sign(payload, Bun.env.JWT_SECRET || '');
+       console.log(token);
 
        setCookie(c, 'token', token, {
            httpOnly: true,
@@ -296,6 +298,8 @@ authRouter.get('/me', async (c) => {
       getCookie(c, 'token') ||
       getCookie(c, 'auth_token');
 
+    console.log('Token:', token);
+
     if (!token) {
       return c.json({ success: false, message: 'Unauthorized' }, 401);
     }
@@ -332,7 +336,7 @@ authRouter.post("/met", async (c) => {
         const payload:JWTPayload = await verify(token, Bun.env.JWT_SECRET || '');
 
         if (payload.telegramId) {
-            // @ts-ignore
+            // @ts-ignorer
             const userData:string = await redisDB.get(`user:${payload.telegramId}`);
             if (!userData) {
                 return c.json({ success: false, message: "User not found" }, 404);

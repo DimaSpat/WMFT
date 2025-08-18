@@ -23,9 +23,6 @@ export const onGet: RequestHandler = async (event) => {
       },
       body: JSON.stringify({token}),
     });
-
-    console.log(res.json().user);
-    console.log(1);
   } catch {
     throw redirect(302, '/auth?error=network');
   }
