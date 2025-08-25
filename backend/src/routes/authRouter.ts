@@ -152,7 +152,9 @@ authRouter.post('/telegram/complete-auth', async (c) => {
        const user = JSON.parse(userData);
        console.log(user);
 
+       // Normalize token payload to include `email` so /me works
        const payload = {
+           email: String(telegramId),
            telegramId,
            username: user.username,
            exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 30),
@@ -181,6 +183,47 @@ authRouter.post('/telegram/complete-auth', async (c) => {
            message: 'Error completing authentication'
        }, 500);
    }
+});
+
+authRouter.get('/telegram/callback', async (c) => {
+    try {
+        const token = c.req.query('token');
+        if (!token) {
+            return c.redirect('http://localhost:5173/auth?error=no_token', 302);
+        }
+
+        const payload = await verify(token, Bun.env.JWT_SECRET || '') as JWTPayload & { telegramId?: number | string; email?: string };
+
+        const ensuredEmail = payload.email ?? (payload.telegramId != null ? String(payload.telegramId) : undefined);
+        if (!ensuredEmail) {
+            return c.redirect('http://localhost:5173/auth?error=invalid_token_payload', 302);
+        }
+
+        // @ts-ignore
+        const userData: string | null = await redisDB.get(`user:${ensuredEmail}`);
+        if (!userData) {
+            return c.redirect('http://localhost:5173/auth?error=user_not_found', 302);
+        }
+
+        const normalizedToken = await sign({
+            email: ensuredEmail,
+            telegramId: payload.telegramId,
+            exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 30),
+        }, Bun.env.JWT_SECRET || '');
+
+        setCookie(c, 'token', normalizedToken, {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'lax',
+            maxAge: 60 * 60 * 24 * 30,
+            path: '/',
+        });
+
+        return c.redirect('http://localhost:5173/', 302);
+    } catch (err) {
+        console.error('Telegram callback error:', err);
+        return c.redirect('http://localhost:5173/auth?error=callback_failed', 302);
+    }
 });
 
 
@@ -277,14 +320,72 @@ authRouter.post("/logout", async (c) => {
         path: '/',
     });
 
+    setCookie(c, 'session', '', {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        maxAge: 0,
+        path: '/',
+    });
+    setCookie(c, 'auth_token', '', {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        maxAge: 0,
+        path: '/',
+    });
+
+
     return c.json({
         success: true,
         message: "Logged out successfully"
     });
 });
 
+// New: allow browser to exchange a token for an API cookie
+authRouter.post('/telegram/set-cookie', async (c) => {
+  try {
+    const { token } = await c.req.json();
+    if (!token) {
+      return c.json({ success: false, message: 'Unauthorized' }, 401);
+    }
 
-// Add this route to your auth router
+    const payload = await verify(token, Bun.env.JWT_SECRET || '') as JWTPayload & {
+      email?: string;
+      telegramId?: number | string;
+    };
+
+    const ensuredEmail = payload.email ?? (payload.telegramId != null ? String(payload.telegramId) : undefined);
+    if (!ensuredEmail) {
+      return c.json({ success: false, message: 'Invalid token payload' }, 401);
+    }
+    // @ts-ignore
+    const userData: string | null = await redisDB.get(`user:${ensuredEmail}`);
+    if (!userData) {
+      return c.json({ success: false, message: 'User not found' }, 404);
+    }
+
+    const normalizedToken = await sign({
+      email: ensuredEmail,
+      telegramId: payload.telegramId,
+      exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 30),
+    }, Bun.env.JWT_SECRET || '');
+
+    setCookie(c, 'token', normalizedToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 30,
+      path: '/',
+    });
+
+    return c.json({ success: true });
+  } catch (err) {
+    console.error('Set-cookie error:', err);
+    return c.json({ success: false, message: 'Internal server error' }, 500);
+  }
+});
+
 
 authRouter.get('/me', async (c) => {
   try {
@@ -296,7 +397,8 @@ authRouter.get('/me', async (c) => {
     const token =
       headerToken ||
       getCookie(c, 'token') ||
-      getCookie(c, 'auth_token');
+      getCookie(c, 'auth_token') ||
+      getCookie(c, 'session');
 
     console.log('Token:', token);
 
@@ -305,7 +407,8 @@ authRouter.get('/me', async (c) => {
     }
 
     const payload = await verify(token, Bun.env.JWT_SECRET || '');
-    const email = (payload as JWTPayload & { email?: string }).email;
+    const email = (payload as JWTPayload & { email?: string; telegramId?: string | number }).email
+      ?? (payload as any).telegramId?.toString();
 
     if (!email) {
       return c.json({ success: false, message: 'Invalid token' }, 401);
@@ -333,21 +436,43 @@ authRouter.post("/met", async (c) => {
             return c.json({ success: false, message: "Unauthorized" }, 401);
         }
 
-        const payload:JWTPayload = await verify(token, Bun.env.JWT_SECRET || '');
-
-        if (payload.telegramId) {
-            // @ts-ignorer
-            const userData:string = await redisDB.get(`user:${payload.telegramId}`);
-            if (!userData) {
-                return c.json({ success: false, message: "User not found" }, 404);
-            }
-            return c.json({
-                success: true,
-                user: JSON.parse(userData),
-            });
+        const payload:JWTPayload & { email?: string; telegramId?: number | string } = await verify(token, Bun.env.JWT_SECRET || '');
+        let ensuredEmail = payload.email;
+        if (!ensuredEmail && payload.telegramId != null) {
+            ensuredEmail = String(payload.telegramId);
         }
 
-        return c.json({ success: false, message: "Invalid token payload" }, 401);
+        if (!ensuredEmail) {
+            return c.json({ success: false, message: "Invalid token payload" }, 401);
+        }
+
+        // @ts-ignore
+        const userData:string = await redisDB.get(`user:${ensuredEmail}`);
+        if (!userData) {
+            return c.json({ success: false, message: "User not found" }, 404);
+        }
+
+        const user = JSON.parse(userData);
+
+        const normalizedToken = await sign({
+            email: ensuredEmail,
+            telegramId: payload.telegramId,
+            exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 30),
+        }, Bun.env.JWT_SECRET || '');
+
+        setCookie(c, 'token', normalizedToken, {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'lax',
+            maxAge: 60 * 60 * 24 * 30,
+            path: '/',
+        });
+
+        return c.json({
+            success: true,
+            user: user,
+            token: normalizedToken,
+        });
     } catch (error) {
         console.error("Error fetching user data:", error);
         return c.json({ success: false, message: "Internal server error" }, 500);
