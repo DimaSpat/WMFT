@@ -30,36 +30,60 @@ export const Header: Component<HeaderProps> = component$((props): JSXOutput => {
 
     return (
         <header style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
             display: 'flex',
             justifyContent: 'space-between',
             padding: '1rem',
-            backgroundColor: '#f5f5f5',
+            backgroundColor: 'rgba(245, 245, 245, 0)',
         }}>
-            <div>
-                <h1>WMFT</h1>
-            </div>
-            <div>
+            <div style={{
+                display: 'grid',
+                // gridAutoColumns: '1fr',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gridTemplateRows: '1fr',
+                width: '100vw',
+                height: '100%',
+            }}>
+                <div><h1>WMFT</h1></div>
                 {props.user ? (
-                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                        <p>Welcome, {props.user.email}</p>
-                        <p>Coins: {props.user.coins}</p>
-                        <button
-                            onClick$={logout}
-                            style={{
-                                background: '#ff4444',
-                                color: 'white',
-                                border: 'none',
-                                padding: '0.5rem 1rem',
-                                borderRadius: '0.25rem',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            Logout
-                        </button>
+                    <>
+                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', justifyContent: 'space-evenly' }}>
+                            |
+                            <Link href="/">Home</Link>
+                            |
+                            <Link href="/profile">Profile</Link>
+                            |
+                            <Link href="/shop">Shop</Link>
+                            |
+                        </div>
+                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', justifyContent: 'flex-end' }}>
+                            <p>Coins: {props.user.coins}</p>
+                            <button
+                                onClick$={logout}
+                                style={{
+                                    background: '#ff4444',
+                                    color: 'white',
+                                    border: 'none',
+                                    padding: '0.5rem 1rem',
+                                    borderRadius: '0.25rem',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Logout
+                            </button>
 
-                    </div>
+                        </div>
+                    </>
                 ) : (
-                    <Link href="/auth">Login</Link>
+                    <>
+                        <div></div>
+                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', justifyContent: 'flex-end' }}>
+                            <Link href="/auth">Login</Link>
+                        </div>
+                    </>
                 )}
             </div>
         </header>

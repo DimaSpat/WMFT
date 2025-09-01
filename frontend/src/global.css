@@ -2,4 +2,25 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    text-decoration: none;
+    list-style: none;
+    font-family: 'Roboto', sans-serif;
+    transition: 0.35s;
+}
+
+body {
+    background-color: rgb(245, 245, 245);
+}
+
+main>div {
+    padding-top: 4rem;
+}
+
+a {
+    color: inherit;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1.5rem;
+} a:hover {
+    font-size: 1.6rem;
 }
