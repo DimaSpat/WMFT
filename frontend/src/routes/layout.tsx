@@ -74,7 +74,7 @@ export default component$(() => {
                 <>
                     <Header user={store.user} />
                     <main>
-                        <Slot></Slot>
+                        <Slot user={store.user} test={1}></Slot>
                     </main>
                 </>
             )}
