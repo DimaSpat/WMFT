@@ -6,6 +6,7 @@ export default component$(() => {
         <div style={{
             minHeight: "250vh",
             background: "beige",
+            paddingTop: "6rem",
         }}>
             <div style={{
                 height: "85vh",
@@ -43,12 +44,12 @@ export default component$(() => {
                 </div>
             </div>
             <div style={{
-                width: "65vh",
+                width: "75dvh",
                 justifySelf: "center",
                 height: "150vh",
                 background: "black",
                 position: "absolute",
-                top: "50vh",
+                top: "75vh",
 
                 borderRadius: "2rem",
                 overflow: "hidden",
