@@ -18,13 +18,13 @@ export default component$(() => {
         storeUser.email = undefined;
         storeUser.coins = undefined;
         storeUser.resources = undefined;
+        console.log(1);
     })
 
     const setStoreUserData = $((data:any) => {
         storeUser.email = data.email;
         storeUser.coins = data.coins;
         storeUser.resources = data.resources;
-        console.log(storeUser);
     });
 
     useVisibleTask$(async ({ track }) => {
@@ -64,7 +64,6 @@ export default component$(() => {
                     await nav('/auth');
                 }
             }
-            await setStoreUserUndefined();
         } catch (error) {
             console.error("Error fetching user data:", error);
             await setStoreUserUndefined();

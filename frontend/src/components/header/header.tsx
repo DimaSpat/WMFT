@@ -4,9 +4,9 @@ import {UserContext, UserState} from "~/context/UserContext";
 
 export const Header: Component = component$((): JSXOutput => {
     const nav = useNavigate();
-    const {coins} = useContext(UserContext);
+    const user = useContext(UserContext);
 
-    console.log(coins);
+    console.log(user);
 
     const logout = $(async () => {
         try {
@@ -43,7 +43,7 @@ export const Header: Component = component$((): JSXOutput => {
                 height: '100%',
             }}>
                 <div><h1>WMFT</h1></div>
-                {coins !== undefined ? (
+                {user.coins !== undefined ? (
                     <>
                         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', justifyContent: 'space-evenly' }}>
                             |
@@ -55,7 +55,7 @@ export const Header: Component = component$((): JSXOutput => {
                             |
                         </div>
                         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', justifyContent: 'flex-end' }}>
-                            <p>Coins: {coins}</p>
+                            <p>Coins: {user.coins}</p>
                             <button
                                 onClick$={logout}
                                 style={{
