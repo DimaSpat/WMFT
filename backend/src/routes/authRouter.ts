@@ -101,16 +101,6 @@ authRouter.post('/telegram/verify', async (c) => {
             });
         }
 
-        // const newUser = {
-        //     telegramId,
-        //     username: username || `user_${telegramId}`,
-        //     firstName,
-        //     lastName,
-        //     coins: 0,
-        //     resources: [],
-        //     createdAt: new Date().toISOString()
-        // };
-
         const newUser = {
             email: telegramId,
             password: telegramId,
