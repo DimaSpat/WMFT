@@ -1,15 +1,12 @@
-import {$, Component, component$, JSXOutput} from "@builder.io/qwik";
+import {$, Component, component$, JSXOutput, useContext} from "@builder.io/qwik";
 import {Link, useNavigate} from "@builder.io/qwik-city";
+import {UserContext, UserState} from "~/context/UserContext";
 
-interface HeaderProps {
-    user?: {
-        email: string;
-        coins: number;
-    } | null;
-}
-
-export const Header: Component<HeaderProps> = component$((props): JSXOutput => {
+export const Header: Component = component$((): JSXOutput => {
     const nav = useNavigate();
+    const user = useContext(UserContext);
+
+    console.log(user);
 
     const logout = $(async () => {
         try {
@@ -25,8 +22,6 @@ export const Header: Component<HeaderProps> = component$((props): JSXOutput => {
             console.error('Logout error:', error);
         }
     });
-
-
 
     return (
         <header style={{
@@ -48,7 +43,7 @@ export const Header: Component<HeaderProps> = component$((props): JSXOutput => {
                 height: '100%',
             }}>
                 <div><h1>WMFT</h1></div>
-                {props.user ? (
+                {user.coins !== undefined ? (
                     <>
                         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', justifyContent: 'space-evenly' }}>
                             |
@@ -60,7 +55,7 @@ export const Header: Component<HeaderProps> = component$((props): JSXOutput => {
                             |
                         </div>
                         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', justifyContent: 'flex-end' }}>
-                            <p>Coins: {props.user.coins}</p>
+                            <p>Coins: {user.coins}</p>
                             <button
                                 onClick$={logout}
                                 style={{

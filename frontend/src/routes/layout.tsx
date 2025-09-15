@@ -1,24 +1,32 @@
-import {component$, Slot, useStore, useVisibleTask$} from "@builder.io/qwik";
+import {$, component$, Slot, useContextProvider, useSignal, useStore, useVisibleTask$} from "@builder.io/qwik";
 import {useNavigate} from "@builder.io/qwik-city";
 import {Header} from "~/components/header/header";
-
-interface UserState {
-    user: {
-        email: string;
-        coins: number;
-        resources: any[];
-    } | null;
-    isLoading: boolean;
-}
+import {UserContext, UserState} from "~/context/UserContext";
 
 export default component$(() => {
-    const store = useStore<UserState>({
-        user: null,
-        isLoading: true,
+    const storeUser = useStore<UserState>({
+        email: undefined,
+        coins: undefined,
+        resources: undefined
     });
+    const signalLoading = useSignal(true);
     const nav = useNavigate();
 
-    // Add trackBy to ensure the task runs when auth state changes
+    useContextProvider(UserContext, storeUser);
+
+    const setStoreUserUndefined = $(() => {
+        storeUser.email = undefined;
+        storeUser.coins = undefined;
+        storeUser.resources = undefined;
+        console.log(1);
+    })
+
+    const setStoreUserData = $((data:any) => {
+        storeUser.email = data.email;
+        storeUser.coins = data.coins;
+        storeUser.resources = data.resources;
+    });
+
     useVisibleTask$(async ({ track }) => {
         track(() => window.location.pathname);
 
@@ -48,33 +56,34 @@ export default component$(() => {
             const data = await response.json();
 
             if (data.success) {
-                store.user = data.user;
+                await setStoreUserData(data.user as UserState);
+                console.log(storeUser);
             } else {
-                store.user = null;
+                await setStoreUserUndefined();
                 if (window.location.pathname !== '/auth') {
                     await nav('/auth');
                 }
             }
         } catch (error) {
             console.error("Error fetching user data:", error);
-            store.user = null;
+            await setStoreUserUndefined();
             if (window.location.pathname !== '/auth') {
                 await nav('/auth');
             }
         } finally {
-            store.isLoading = false;
+            signalLoading.value = false;
         }
     });
 
     return (
         <div>
-            {store.isLoading ? (
+            {signalLoading.value ? (
                 <div>Loading...</div>
             ) : (
                 <>
-                    <Header user={store.user} />
+                    <Header />
                     <main>
-                        <Slot user={store.user} test={1}></Slot>
+                        <Slot></Slot>
                     </main>
                 </>
             )}
