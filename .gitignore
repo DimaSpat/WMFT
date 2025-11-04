@@ -1,6 +1,11 @@
 .env
 .env.*
 !.env.example
+./backend/.env
+./backend/node_modules
+
+./frontend/.env
+./frontend/node_modules
 
 # Node/Bun dependencies
 node_modules/
