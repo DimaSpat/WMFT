@@ -32,16 +32,12 @@ stripeRouter.post('/api/payment/create-checkout-session', async (c) => {
         });
 
         return c.json({
-            success: true,
             url: session.url
         });
 
     } catch (error: any) {
         console.error('Error creating checkout session:', error);
-        return c.json({
-            success: false,
-            message: error.message
-        }, 500);
+        return c.json({ error: error.message }, 500);
     }
 });
 

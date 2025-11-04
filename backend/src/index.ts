@@ -6,6 +6,7 @@ import { getCookie } from "hono/cookie";
 import { createClient } from "redis";
 
 import { authRouter } from "./routes/authRouter";
+import { stripeRouter } from "./routes/stripeRouter";
 
 const app = new Hono();
 
@@ -29,6 +30,7 @@ app.use('/*', cors({
 app.use(logger());
 
 app.route('/api/auth', authRouter);
+app.route('/api/stripe', stripeRouter);
 app.use('/api/user/*', bearerAuth({
     verifyToken: async (token:string, c:any):Promise<boolean> => {
         return token === getCookie(c, 'token');
@@ -44,7 +46,7 @@ app.post('/api/test', async (c:any) => {
 start().then(() => console.log("Server started successfully"));
 
 export default {
-    port: Bun.env.PORT,
+    port: Bun.env.PORT || 5000,
     fetch: app.fetch,
 }
 
