@@ -1,25 +1,31 @@
-import {$, component$} from "@builder.io/qwik";
+import {$, component$, useContext} from "@builder.io/qwik";
+import {UserContext} from "~/context/UserContext";
 
 export const Item = component$((props: any) => {
+    const { email } = useContext(UserContext);
+
     const handleCheckout = $(async () => {
         try {
-            const response = await fetch("/api/payment/create-checkout-session", {
+            const response = await fetch("http://localhost:5000/api/payment/create-checkout-session", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    amount: Math.round(props.price * 100), // Convert to cents
+                    amount: Math.round(props.price * 100),
                     currency: "cad",
                     name: props.name,
                     description: props.description,
+                    userId: (email)?.toLowerCase(),
+                    resourceType: props.resourceType,
+                    resourceAmount: props.resourceAmount,
                 }),
             });
 
             const data = await response.json();
+            console.log(data.url);
 
-            if (data.success && data.url) {
-                // Redirect to Stripe Checkout
+            if (data.url) {
                 window.location.href = data.url;
             } else {
                 alert("Failed to start checkout. Please try again.");
@@ -56,6 +62,9 @@ export const Item = component$((props: any) => {
             <h2>{props.name}</h2>
             <p style={{fontSize:"1rem", verticalAlign: "center"}}>
                 {props.description}
+            </p>
+            <p style={{fontSize:"1rem", fontWeight: "bold", verticalAlign: "center"}}>
+                Type: {props.resourceType} | Amount: {props.resourceAmount}
             </p>
             <p style={{fontSize:"1rem", fontWeight: "bold", verticalAlign: "center"}}>
                 {(props.price).toFixed(2)} $ CAD

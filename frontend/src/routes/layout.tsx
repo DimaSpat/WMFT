@@ -57,7 +57,6 @@ export default component$(() => {
 
             if (data.success) {
                 await setStoreUserData(data.user as UserState);
-                console.log(storeUser);
             } else {
                 await setStoreUserUndefined();
                 if (window.location.pathname !== '/auth') {

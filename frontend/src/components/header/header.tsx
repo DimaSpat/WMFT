@@ -6,8 +6,6 @@ export const Header: Component = component$((): JSXOutput => {
     const nav = useNavigate();
     const user = useContext(UserContext);
 
-    console.log(user);
-
     const logout = $(async () => {
         try {
             const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/logout`, {

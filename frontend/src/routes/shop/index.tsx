@@ -48,12 +48,16 @@ const ProductDisplay = component$(() => {
                     name={"Bucket of coins"} 
                     price={200} 
                     description={"Lorem ipsum dolor sit amet, consectetur adipisicing elit."}
+                    resourceType={"coins"}
+                    resourceAmount={2000}
                 />
                 <Item 
                     image={"💰"} 
                     name={"Bag of coins"} 
                     price={500} 
                     description={"Get more coins for your adventures!"}
+                    resourceType={"coins"}
+                    resourceAmount={5000}
                 />
             </div>
             <h2 style={{ textAlign: "center", fontSize: "3rem" }}>Buy resources</h2>
@@ -62,25 +66,7 @@ const ProductDisplay = component$(() => {
 });
 
 export default component$(() => {
-    const loc = useLocation();
-    
-    // Check if this is a redirect back from Checkout
-    const success = loc.url.searchParams.get("success");
-    const canceled = loc.url.searchParams.get("canceled");
-    
-    let message = "";
-    
-    if (success === "true") {
-        message = "Order placed! You will receive an email confirmation.";
-    }
-    
-    if (canceled === "true") {
-        message = "Order canceled -- continue to shop around and checkout when you're ready.";
-    }
-
-    return message ? (
-        <Message message={message} />
-    ) : (
+    return (
         <ProductDisplay />
     );
 });

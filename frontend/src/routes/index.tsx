@@ -1,7 +1,24 @@
 import { component$, useVisibleTask$, useSignal } from "@builder.io/qwik";
-import {DocumentHead, Link} from "@builder.io/qwik-city";
+import {DocumentHead, Link, useLocation} from "@builder.io/qwik-city";
 
 export default component$(() => {
+    const loc = useLocation();
+    useVisibleTask$(() => {
+        const success = loc.url.searchParams.get("success");
+        const canceled = loc.url.searchParams.get("canceled");
+
+        let message = "";
+
+        if (success === "true") {
+            message = "Order placed! You will receive an email confirmation.";
+        }
+
+        if (canceled === "true") {
+            message = "Order canceled -- continue to shop around and checkout when you're ready.";
+        }
+        alert(message)
+    })
+
     return (
         <div style={{
             minHeight: "250vh",

@@ -23,14 +23,14 @@ const start = async ():Promise<void> => {
     await redisDB.connect().then(() => console.log("Connected Database server: Redis"));
 }
 
-app.use('/*', cors({
+app.use('/api/*', cors({
     origin: ['http://localhost:5173'],
     credentials: true,
 }));
 app.use(logger());
 
 app.route('/api/auth', authRouter);
-app.route('/api/stripe', stripeRouter);
+app.route('/api/payment', stripeRouter);
 app.use('/api/user/*', bearerAuth({
     verifyToken: async (token:string, c:any):Promise<boolean> => {
         return token === getCookie(c, 'token');

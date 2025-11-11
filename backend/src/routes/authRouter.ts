@@ -3,7 +3,6 @@ import { googleAuth } from '@hono/oauth-providers/google';
 import { redisDB } from "../index";
 import {sign, verify} from 'hono/jwt';
 import {getCookie, setCookie} from "hono/cookie";
-import {auth} from "hono/dist/types/utils/basic-auth";
 import {JWTPayload} from "hono/dist/types/utils/jwt/types";
 
 const authRouter = new Hono();
