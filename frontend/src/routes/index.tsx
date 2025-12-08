@@ -1,23 +1,7 @@
-import { component$, useVisibleTask$, useSignal } from "@builder.io/qwik";
-import {DocumentHead, Link, useLocation} from "@builder.io/qwik-city";
+import {component$} from "@builder.io/qwik";
+import {DocumentHead, Link} from "@builder.io/qwik-city";
 
 export default component$(() => {
-    const loc = useLocation();
-    useVisibleTask$(() => {
-        const success = loc.url.searchParams.get("success");
-        const canceled = loc.url.searchParams.get("canceled");
-
-        let message = "";
-
-        if (success === "true") {
-            message = "Order placed! You will receive an email confirmation.";
-        }
-
-        if (canceled === "true") {
-            message = "Order canceled -- continue to shop around and checkout when you're ready.";
-        }
-        alert(message)
-    })
 
     return (
         <div style={{
@@ -51,7 +35,7 @@ export default component$(() => {
                     }}><span style={{color: "#966F33"}}>W</span> | <span style={{color: "gray"}}>M</span> | <span style={{color: "#BA8E23"}}>F</span> | <span>T</span></span>
                     <h1>Welcome to Wood Cutting Mining Farming Trading</h1>
                     <h4>This is a new game, it's point is to become the richest player on the planet by trading for coins.</h4>
-                    <Link style={{
+                    <Link href={"/play/"} style={{
                         background: "#966F33",
                         marginTop: "1rem",
                         padding: "1rem 2rem",

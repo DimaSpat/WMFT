@@ -1,5 +1,5 @@
-import { component$, $, JSXOutput, Signal, useSignal } from "@builder.io/qwik";
-import {DocumentHead, useNavigate} from "@builder.io/qwik-city";
+import {component$, $, JSXOutput, Signal, useSignal, isBrowser} from "@builder.io/qwik";
+import {DocumentHead} from "@builder.io/qwik-city";
 
 export const head: DocumentHead = {
     title: "Authentication",
@@ -54,7 +54,7 @@ const validateForm:any = (form:HTMLFormElement|undefined, isSigning:boolean):Aut
     return null;
 };
 
-const handleAuthError:any = (error: unknown): AuthResult => ({
+const handleAuthError:any = (): AuthResult => ({
     success: false,
     message: "An error occurred while processing your request."
 });
@@ -65,7 +65,6 @@ export default component$(():JSXOutput => {
     const isLoading:Signal<boolean> = useSignal(false);
     const formRef:Signal<HTMLFormElement | undefined> = useSignal<HTMLFormElement>();
     const result:Signal = useSignal<any>(null);
-    const nav = useNavigate();
 
     const changeAuthState:any = $(():void => {
         isSigning.value = !isSigning.value;
@@ -102,7 +101,7 @@ export default component$(():JSXOutput => {
 
             const responseData = await response.json();
 
-            if (responseData.success) {
+            if (responseData.success && isBrowser) {
                 if (isSigning.value) {
                     window.location.href = '/';
                 } else {

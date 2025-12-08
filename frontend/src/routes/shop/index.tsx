@@ -1,35 +1,5 @@
 import { component$ } from "@builder.io/qwik";
-import { useLocation } from "@builder.io/qwik-city";
-import { Item } from "~/components/shop/shop";
-
-const Message = component$<{ message: string }>((props) => {
-    return (
-        <section style={{
-            textAlign: "center",
-            padding: "2rem",
-            margin: "2rem auto",
-            maxWidth: "600px",
-            background: "#f0f0f0",
-            borderRadius: "1rem",
-        }}>
-            <p style={{ fontSize: "1.2rem" }}>{props.message}</p>
-            <a 
-                href="/" 
-                style={{
-                    display: "inline-block",
-                    marginTop: "1rem",
-                    padding: "0.75rem 1.5rem",
-                    background: "#000",
-                    color: "#fff",
-                    textDecoration: "none",
-                    borderRadius: "0.5rem",
-                }}
-            >
-                Continue Shopping
-            </a>
-        </section>
-    );
-});
+import { ItemPayed, Item } from "~/components/shop/shop";
 
 const ProductDisplay = component$(() => {
     return (
@@ -43,7 +13,7 @@ const ProductDisplay = component$(() => {
                 gap: "2rem",
                 flexWrap: "wrap"
             }}>
-                <Item 
+                <ItemPayed
                     image={"🪙"} 
                     name={"Bucket of coins"} 
                     price={200} 
@@ -51,7 +21,7 @@ const ProductDisplay = component$(() => {
                     resourceType={"coins"}
                     resourceAmount={2000}
                 />
-                <Item 
+                <ItemPayed
                     image={"💰"} 
                     name={"Bag of coins"} 
                     price={500} 
@@ -61,6 +31,71 @@ const ProductDisplay = component$(() => {
                 />
             </div>
             <h2 style={{ textAlign: "center", fontSize: "3rem" }}>Buy resources</h2>
+            <div style={{ display: "flex", justifyContent: "center", padding: "2rem", gap: "2rem", flexWrap: "wrap" }}>
+                <Item
+                    image={"🪵"}
+                    name={"Wood forest"}
+                    price={200}
+                    priceType={"coins"}
+                    description={"Lorem ipsum dolor sit amet, consectetur adipisicing elit."}
+                    resourceType={"Wood"}
+                    resourceAmount={1000000}
+                />
+                <Item
+                    image={"🌲"}
+                    name={"Forest planet"}
+                    price={10000}
+                    priceType={"coins"}
+                    description={"Lorem ipsum dolor sit amet, consectetur adipisicing elit."}
+                    resourceType={"Wood"}
+                    resourceAmount={1000000000}
+                />
+                <Item
+                    image={"🌾"}
+                    name={"Wheat field"}
+                    price={200}
+                    priceType={"coins"}
+                    description={"Lorem ipsum dolor sit amet, consectetur adipisicing elit."}
+                    resourceType={"Wheat"}
+                    resourceAmount={100000}
+                />
+                <Item
+                    image={"🧺"}
+                    name={"Wheat planet"}
+                    price={6000}
+                    priceType={"coins"}
+                    description={"Lorem ipsum dolor sit amet, consectetur adipisicing elit."}
+                    resourceType={"Wheat"}
+                    resourceAmount={1000000000}
+                />
+                <Item
+                    image={"🪨"}
+                    name={"Mineral underworld"}
+                    price={650}
+                    priceType={"coins"}
+                    description={"Lorem ipsum dolor sit amet, consectetur adipisicing elit."}
+                    resourceType={"Mineral"}
+                    resourceAmount={6500}
+                />
+                <Item
+                    image={"☢️"}
+                    name={"Mineral planet"}
+                    price={10000}
+                    priceType={"coins"}
+                    description={"Lorem ipsum dolor sit amet, consectetur adipisicing elit."}
+                    resourceType={"Mineral"}
+                    resourceAmount={125000}
+                />
+                <Item
+                    image={"💎"}
+                    name={"Rare mineral bucket"}
+                    price={10000}
+                    priceType={"coins"}
+                    description={"Lorem ipsum dolor sit amet, consectetur adipisicing elit."}
+                    resourceType={"Rare minerals"}
+                    resourceAmount={10}
+                />
+            </div>
         </div>
     );
 });

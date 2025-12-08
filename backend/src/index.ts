@@ -6,7 +6,8 @@ import { getCookie } from "hono/cookie";
 import { createClient } from "redis";
 
 import { authRouter } from "./routes/authRouter";
-import { stripeRouter } from "./routes/stripeRouter";
+import { paymentRouter } from "./routes/paymentRouter";
+import {gameRouter} from "./routes/gameRouter";
 
 const app = new Hono();
 
@@ -24,13 +25,16 @@ const start = async ():Promise<void> => {
 }
 
 app.use('/api/*', cors({
-    origin: ['http://localhost:5173'],
+    origin: [`http://localhost:${Bun.env.FRONTEND_PORT}`],
     credentials: true,
 }));
+
+console.log(Bun.env.FRONTEND_PORT);
 app.use(logger());
 
 app.route('/api/auth', authRouter);
-app.route('/api/payment', stripeRouter);
+app.route('/api/payment', paymentRouter);
+app.route('/api/game', gameRouter);
 app.use('/api/user/*', bearerAuth({
     verifyToken: async (token:string, c:any):Promise<boolean> => {
         return token === getCookie(c, 'token');

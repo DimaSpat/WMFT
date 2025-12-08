@@ -2,11 +2,52 @@ import {Hono} from "hono";
 import Stripe from "stripe";
 import {redisDB} from "../index";
 
-const stripeRouter = new Hono();
+const paymentRouter = new Hono();
 
 const stripe = new Stripe(Bun.env.STRIPE_SECRET_KEY!);
 
-stripeRouter.post('/webhook', async (c) => {
+paymentRouter.post("/coinsPayment", async (c) => {
+    try {
+        const { userId, price, resourceType, resourceAmount } = await c.req.json();
+
+        if (!userId) {
+            return c.json({ error: 'User ID is required' }, 400);
+        }
+
+        const userData = await redisDB.get(`user:${userId}`);
+        if (!userData) {
+            return c.json({ error: 'User not found' }, 404);
+        }
+
+        const user = JSON.parse(userData.toString());
+
+        if (user.coins < price) {
+            return c.json({ error: 'Insufficient coins' }, 400);
+        }
+
+        user.coins = user.coins - price;
+
+        user.resources = user.resources || {};
+        user.resources[resourceType] = (user.resources[resourceType] || 0) + resourceAmount;
+
+        await redisDB.set(`user:${userId}`, JSON.stringify(user));
+
+        console.log(`Successfully processed coins payment for user ${userId}: deducted ${price} coins, added ${resourceAmount} ${resourceType}`);
+
+        return c.json({
+            success: true,
+            message: 'Payment successful',
+            coins: user.coins,
+            resources: user.resources
+        });
+
+    } catch (e) {
+        console.log('Error processing coins payment:', e);
+        return c.json({ error: 'Internal server error' }, 500);
+    }
+})
+
+paymentRouter.post('/webhook', async (c) => {
     try {
         const rawBody = await c.req.text();
         const sig = c.req.header('stripe-signature');
@@ -79,7 +120,7 @@ async function addResourcesToUser(userId: string, resourceType: string, amount: 
     }
 }
 
-stripeRouter.post('/create-checkout-session', async (c) => {
+paymentRouter.post('/create-checkout-session', async (c) => {
     try {
         const { amount, currency, name, description, userId, resourceType, resourceAmount } = await c.req.json();
 
@@ -120,7 +161,7 @@ stripeRouter.post('/create-checkout-session', async (c) => {
     }
 });
 
-stripeRouter.get('/session-status', async (c) => {
+paymentRouter.get('/session-status', async (c) => {
     const sessionId = c.req.query('session_id');
 
     if (!sessionId) {
@@ -141,4 +182,4 @@ stripeRouter.get('/session-status', async (c) => {
     }
 });
 
-export { stripeRouter };
+export { paymentRouter };
