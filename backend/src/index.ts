@@ -29,8 +29,9 @@ app.use('/api/*', cors({
     credentials: true,
 }));
 
-console.log(Bun.env.FRONTEND_PORT);
-app.use(logger());
+if (Bun.env.IS_DEPLOYMENT) {
+    app.use(logger());
+}
 
 app.route('/api/auth', authRouter);
 app.route('/api/payment', paymentRouter);
@@ -49,9 +50,11 @@ app.post('/api/test', async (c:any) => {
 
 start().then(() => console.log("Server started successfully"));
 
-export default {
-    port: Bun.env.PORT || 5000,
-    fetch: app.fetch,
-}
+
+export default app;
+// export default {
+//     port: Bun.env.PORT || 5000,
+//     fetch: app.fetch,
+// }
 
 export { redisDB };
