@@ -13,10 +13,10 @@ const app = new Hono();
 
 const redisDB = createClient({
     username: 'default',
-    password: Bun.env.REDIS_PASSWORD,
+    password: Bun.env.REDIS_PASSWORD || process.env.REDIS_PASSWORD,
     socket: {
-        host: Bun.env.REDIS_HOST,
-        port: Number(Bun.env.REDIS_PORT),
+        host: Bun.env.REDIS_HOST || process.env.REDIS_HOST,
+        port: Bun.env.REDIS_PORT || process.env.REDIS_PORT,
     }
 });
 
@@ -25,11 +25,11 @@ const start = async ():Promise<void> => {
 }
 
 app.use('/api/*', cors({
-    origin: [`http://localhost:${Bun.env.FRONTEND_PORT}`],
+    origin: [`http://localhost:${Bun.env.FRONTEND_PORT ||process.env.FRONTEND_PORT}`],
     credentials: true,
 }));
 
-if (Bun.env.IS_DEPLOYMENT) {
+if (Bun.env.IS_DEPLOYMENT || process.env.NODE_ENV === "development") {
     app.use(logger());
 }
 
