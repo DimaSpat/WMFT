@@ -16,7 +16,7 @@ const redisDB = createClient({
     password: Bun.env.REDIS_PASSWORD || process.env.REDIS_PASSWORD,
     socket: {
         host: Bun.env.REDIS_HOST || process.env.REDIS_HOST,
-        port: Bun.env.REDIS_PORT || Number(process.env.REDIS_PORT),
+        port: Number(Bun.env.REDIS_PORT || process.env.REDIS_PORT),
     }
 });
 
