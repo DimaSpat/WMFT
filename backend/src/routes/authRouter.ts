@@ -3,7 +3,7 @@ import { googleAuth } from '@hono/oauth-providers/google';
 import { redisDB } from "../index";
 import {sign, verify} from 'hono/jwt';
 import {getCookie, setCookie} from "hono/cookie";
-import {JWTPayload} from "hono/dist/types/utils/jwt/types";
+// import {JWTPayload} from "hono/utils/jwt";
 
 const authRouter = new Hono();
 const PORT = Bun.env.FRONTEND_PORT;
@@ -192,7 +192,7 @@ authRouter.get('/telegram/callback', async (c) => {
             return c.redirect(`http://localhost:${PORT}/auth?error=no_token`, 302);
         }
 
-        const payload = await verify(token, Bun.env.JWT_SECRET || '') as JWTPayload & { telegramId?: number | string; email?: string };
+        const payload = await verify(token, Bun.env.JWT_SECRET || '') as { telegramId?: number | string; email?: string };
 
         const ensuredEmail = payload.email ?? (payload.telegramId != null ? String(payload.telegramId) : undefined);
         if (!ensuredEmail) {
@@ -350,7 +350,7 @@ authRouter.post('/telegram/set-cookie', async (c) => {
       return c.json({ success: false, message: 'Unauthorized' }, 401);
     }
 
-    const payload = await verify(token, Bun.env.JWT_SECRET || '') as JWTPayload & {
+    const payload = await verify(token, Bun.env.JWT_SECRET || '') as {
       email?: string;
       telegramId?: number | string;
     };
@@ -407,7 +407,7 @@ authRouter.get('/me', async (c) => {
     }
 
     const payload = await verify(token, Bun.env.JWT_SECRET || '');
-    const email = (payload as JWTPayload & { email?: string; telegramId?: string | number }).email
+    const email = (payload as & { email?: string; telegramId?: string | number }).email
       ?? (payload as any).telegramId?.toString();
 
     if (!email) {
@@ -436,7 +436,7 @@ authRouter.post("/met", async (c) => {
             return c.json({ success: false, message: "Unauthorized" }, 401);
         }
 
-        const payload:JWTPayload & { email?: string; telegramId?: number | string } = await verify(token, Bun.env.JWT_SECRET || '');
+        const payload:any & { email?: string; telegramId?: number | string } = await verify(token, Bun.env.JWT_SECRET || '');
         let ensuredEmail = payload.email;
         if (!ensuredEmail && payload.telegramId != null) {
             ensuredEmail = String(payload.telegramId);
