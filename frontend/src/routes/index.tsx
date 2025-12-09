@@ -1,7 +1,8 @@
-import { component$, useVisibleTask$, useSignal } from "@builder.io/qwik";
+import {component$} from "@builder.io/qwik";
 import {DocumentHead, Link} from "@builder.io/qwik-city";
 
 export default component$(() => {
+
     return (
         <div style={{
             minHeight: "250vh",
@@ -34,7 +35,7 @@ export default component$(() => {
                     }}><span style={{color: "#966F33"}}>W</span> | <span style={{color: "gray"}}>M</span> | <span style={{color: "#BA8E23"}}>F</span> | <span>T</span></span>
                     <h1>Welcome to Wood Cutting Mining Farming Trading</h1>
                     <h4>This is a new game, it's point is to become the richest player on the planet by trading for coins.</h4>
-                    <Link style={{
+                    <Link href={"/play/"} style={{
                         background: "#966F33",
                         marginTop: "1rem",
                         padding: "1rem 2rem",

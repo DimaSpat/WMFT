@@ -3,10 +3,10 @@ import { googleAuth } from '@hono/oauth-providers/google';
 import { redisDB } from "../index";
 import {sign, verify} from 'hono/jwt';
 import {getCookie, setCookie} from "hono/cookie";
-import {auth} from "hono/dist/types/utils/basic-auth";
 import {JWTPayload} from "hono/dist/types/utils/jwt/types";
 
 const authRouter = new Hono();
+const PORT = Bun.env.FRONTEND_PORT;
 
 async function findUserFromDB(email: string | unknown): Promise<{ user:any | null; exists: boolean}> {
     try {
@@ -73,7 +73,7 @@ authRouter.get('/google', async (c) => {
         path: '/',
     });
 
-    return c.redirect(`http://localhost:5173/`);
+    return c.redirect(`http://localhost:${PORT}/`);
 });
 
 authRouter.get('/telegram', async (c) => {
@@ -174,7 +174,7 @@ authRouter.post('/telegram/complete-auth', async (c) => {
        return c.json({
            success: true,
            token,
-           redirectUrl: 'http://localhost:5173/'
+           redirectUrl: `http://localhost:${PORT}/`
        });
    } catch (error) {
        console.error('Complete auth error:', error);
@@ -189,20 +189,20 @@ authRouter.get('/telegram/callback', async (c) => {
     try {
         const token = c.req.query('token');
         if (!token) {
-            return c.redirect('http://localhost:5173/auth?error=no_token', 302);
+            return c.redirect(`http://localhost:${PORT}/auth?error=no_token`, 302);
         }
 
         const payload = await verify(token, Bun.env.JWT_SECRET || '') as JWTPayload & { telegramId?: number | string; email?: string };
 
         const ensuredEmail = payload.email ?? (payload.telegramId != null ? String(payload.telegramId) : undefined);
         if (!ensuredEmail) {
-            return c.redirect('http://localhost:5173/auth?error=invalid_token_payload', 302);
+            return c.redirect(`http://localhost:${PORT}/auth?error=invalid_token_payload`, 302);
         }
 
         // @ts-ignore
         const userData: string | null = await redisDB.get(`user:${ensuredEmail}`);
         if (!userData) {
-            return c.redirect('http://localhost:5173/auth?error=user_not_found', 302);
+            return c.redirect(`http://localhost:${PORT}/auth?error=user_not_found`, 302);
         }
 
         const normalizedToken = await sign({
@@ -219,10 +219,10 @@ authRouter.get('/telegram/callback', async (c) => {
             path: '/',
         });
 
-        return c.redirect('http://localhost:5173/', 302);
+        return c.redirect(`http://localhost:${PORT}/`, 302);
     } catch (err) {
         console.error('Telegram callback error:', err);
-        return c.redirect('http://localhost:5173/auth?error=callback_failed', 302);
+        return c.redirect(`http://localhost:${PORT}/auth?error=callback_failed`, 302);
     }
 });
 

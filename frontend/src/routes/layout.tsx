@@ -1,4 +1,12 @@
-import {$, component$, Slot, useContextProvider, useSignal, useStore, useVisibleTask$} from "@builder.io/qwik";
+import {
+    $,
+    component$,
+    Slot,
+    useContextProvider,
+    useSignal,
+    useStore,
+    useVisibleTask$
+} from "@builder.io/qwik";
 import {useNavigate} from "@builder.io/qwik-city";
 import {Header} from "~/components/header/header";
 import {UserContext, UserState} from "~/context/UserContext";
@@ -27,6 +35,7 @@ export default component$(() => {
         storeUser.resources = data.resources;
     });
 
+    //  eslint-disable-next-line qwik/no-use-visible-task
     useVisibleTask$(async ({ track }) => {
         track(() => window.location.pathname);
 
@@ -57,7 +66,6 @@ export default component$(() => {
 
             if (data.success) {
                 await setStoreUserData(data.user as UserState);
-                console.log(storeUser);
             } else {
                 await setStoreUserUndefined();
                 if (window.location.pathname !== '/auth') {
