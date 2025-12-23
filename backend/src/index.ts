@@ -29,7 +29,7 @@ const start = async (): Promise<void> => {
 app.use(
   "/api/*",
   cors({
-    origin: "*",
+    origin: (origin) => origin,
     credentials: true,
   }),
 );
