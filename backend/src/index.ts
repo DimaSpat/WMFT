@@ -29,8 +29,11 @@ const start = async (): Promise<void> => {
 app.use(
   "/api/*",
   cors({
-    origin: (origin) => origin,
+    origin: Bun.env.CORS_ORIGIN || process.env.CORS_ORIGIN || "*",
     credentials: true,
+    allowHeaders: ["Content-Type", "Authorization"],
+    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    exposeHeaders: ["*"],
   }),
 );
 
