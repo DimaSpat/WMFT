@@ -7,7 +7,7 @@ export const ItemPayed = component$((props: any) => {
   const handleCheckout = $(async () => {
     try {
       const response = await fetch(
-        "https://wmft-backend.verce.app/api/payment/create-checkout-session",
+        `${import.meta.env.VITE_BASE_URL}/api/payment/create-checkout-session`,
         {
           method: "POST",
           headers: {
