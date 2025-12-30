@@ -55,7 +55,7 @@ paymentRouter.post("/webhook", async (c) => {
     const sig = c.req.header("stripe-signature");
 
     if (!sig) {
-      return c.json({ error: "No stripe-signature header" }, 400);
+      console.log(sig);
     }
 
     const endpointSecret = Bun.env.STRIPE_WEBHOOK_SECRET;
