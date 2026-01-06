@@ -27,7 +27,6 @@ export default component$(() => {
     storeUser.coins = undefined;
     storeUser.resources = undefined;
   });
-  console.log(1);
 
   const setStoreUserData = $((data: any) => {
     storeUser.email = data.email;
