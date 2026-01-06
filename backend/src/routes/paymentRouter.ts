@@ -78,12 +78,16 @@ paymentRouter.post("/webhook", async (c) => {
       return c.json({ error: `Webhook Error: ${err.message}` }, 400);
     }
 
+    console.log(1);
     if (event.type === "checkout.session.completed") {
+      console.log(2);
       const session = event.data.object;
 
       const userId = session.metadata?.userId;
       const resourceType = session.metadata?.resourceType || "coins";
       const resourceAmount = parseInt(session.metadata?.resourceAmount || "0");
+
+      console.log("Processing completed checkout for user:", userId);
 
       if (userId) {
         await addResourcesToUser(userId, resourceType, resourceAmount);
