@@ -54,6 +54,8 @@ paymentRouter.post("/webhook", async (c) => {
     const rawBody = await c.req.text();
     const sig = c.req.header("stripe-signature");
 
+    console.log("Received webhook with signature:", sig);
+
     if (!sig) {
       console.log(sig);
     }
