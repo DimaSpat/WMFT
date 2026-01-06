@@ -28,7 +28,6 @@ export const ItemPayed = component$((props: any) => {
       );
 
       const data = await response.json();
-      console.log(data.url);
 
       if (data.url) {
         window.location.href = data.url;
@@ -115,7 +114,6 @@ export const Item = component$((props: any) => {
       const resourceType =
         resourceMap[props.resourceType] || props.resourceType.toLowerCase();
 
-      console.log(props);
       const response = await fetch(
         "https://wmft-backend.vercel.app/api/payment/coinsPayment",
         {
