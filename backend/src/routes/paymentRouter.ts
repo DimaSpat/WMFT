@@ -33,10 +33,6 @@ paymentRouter.post("/coinsPayment", async (c) => {
 
     await redisDB.set(`user:${userId}`, JSON.stringify(user));
 
-    console.log(
-      `Successfully processed coins payment for user ${userId}: deducted ${price} coins, added ${resourceAmount} ${resourceType}`,
-    );
-
     return c.json({
       success: true,
       message: "Payment successful",
@@ -44,7 +40,7 @@ paymentRouter.post("/coinsPayment", async (c) => {
       resources: user.resources,
     });
   } catch (e) {
-    console.log("Error processing coins payment:", e);
+    console.error("Error processing coins payment:", e);
     return c.json({ error: "Internal server error" }, 500);
   }
 });
@@ -54,14 +50,11 @@ paymentRouter.post("/webhook", async (c) => {
     const rawBody = await c.req.text();
     const sig = c.req.header("stripe-signature");
 
-    console.log("Received webhook with signature:", sig);
-
     if (!sig) {
-      console.log(sig);
+      console.error("No signature");
     }
 
     const endpointSecret = Bun.env.STRIPE_WEBHOOK_SECRET;
-    console.log(endpointSecret);
     if (!endpointSecret) {
       return c.json({ error: "Webhook secret not configured" }, 500);
     }
@@ -78,22 +71,15 @@ paymentRouter.post("/webhook", async (c) => {
       return c.json({ error: `Webhook Error: ${err.message}` }, 400);
     }
 
-    console.log(1);
     if (event.type === "checkout.session.completed") {
-      console.log(2);
       const session = event.data.object;
 
       const userId = session.metadata?.userId;
       const resourceType = session.metadata?.resourceType || "coins";
       const resourceAmount = parseInt(session.metadata?.resourceAmount || "0");
 
-      console.log("Processing completed checkout for user:", userId);
-
       if (userId) {
         await addResourcesToUser(userId, resourceType, resourceAmount);
-        console.log(
-          `Added ${resourceAmount} ${resourceType} to user ${userId}`,
-        );
       } else {
         console.error("No user ID found in session metadata");
       }
@@ -130,9 +116,6 @@ async function addResourcesToUser(
     }
 
     await redisDB.set(`user:${userId}`, JSON.stringify(user));
-    console.log(
-      `Successfully updated user ${userId}: added ${amount} ${resourceType}`,
-    );
   } catch (error) {
     console.error("Error updating user resources:", error);
     throw error;

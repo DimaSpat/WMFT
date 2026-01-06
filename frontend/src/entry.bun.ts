@@ -24,8 +24,6 @@ const { router, notFound, staticFile } = createQwikCity({
 // Allow for dynamic port
 const port = 5173; // Number(Bun.env.PORT ?? 5173);
 
-console.log(`Server started: http://localhost:${port}/`);
-
 Bun.serve({
   async fetch(request: Request) {
     const staticResponse = await staticFile(request);
