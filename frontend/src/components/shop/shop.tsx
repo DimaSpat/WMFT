@@ -139,6 +139,9 @@ export const Item = component$((props: any) => {
       if (response.ok) {
         if (data.coins !== undefined) {
           // window.location.reload();
+          alert(
+            `Purchased ${props.resourceAmount} of ${props.resourceType} for ${props.price}`,
+          );
         } else {
           window.location.href = "/profile";
         }
