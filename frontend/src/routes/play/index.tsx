@@ -38,6 +38,8 @@ interface GameState {
 }
 
 export default component$(() => {
+  const baseURL = import.meta.env.VITE_API_BASE_URL;
+
   const user = useContext(UserContext);
   const gameState = useSignal<GameState>({
     buildings: {
@@ -183,7 +185,7 @@ export default component$(() => {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/game/build", {
+      const response = await fetch(`${baseURL}/api/game/build`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -226,7 +228,7 @@ export default component$(() => {
     try {
       if (user.email) {
         const response = await fetch(
-          `http://localhost:5000/api/game/state?userId=${user.email.toLowerCase()}`,
+          `${baseURL}/api/game/state?userId=${user.email.toLowerCase()}`,
         );
         if (response.ok) {
           const data = await response.json();
@@ -285,7 +287,7 @@ export default component$(() => {
     if (Object.keys(migratedResources).length > 0) {
       user.resources = migratedResources;
       try {
-        await fetch("http://localhost:5000/api/game/state", {
+        await fetch(`${baseURL}/api/game/state`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
