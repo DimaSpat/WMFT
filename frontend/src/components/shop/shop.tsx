@@ -137,10 +137,8 @@ export const Item = component$((props: any) => {
       const data = await response.json();
 
       if (response.ok) {
-        // Update the user context with the new coins and resources
         if (data.coins !== undefined) {
-          // Reload the page to refresh resources
-          window.location.reload();
+          // window.location.reload();
         } else {
           window.location.href = "/profile";
         }
