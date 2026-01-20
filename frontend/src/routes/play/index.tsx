@@ -174,6 +174,8 @@ export default component$(() => {
 
   const purchaseBuilding = $(async (building: keyof GameState["buildings"]) => {
     const cost = buildingCosts[building];
+    console.log(1);
+
     if (!cost) {
       alert("Invalid building type!");
       return;
@@ -185,6 +187,7 @@ export default component$(() => {
     }
 
     try {
+      console.log(2);
       const response = await fetch(`${baseURL}/api/game/build`, {
         method: "POST",
         headers: {
@@ -198,7 +201,9 @@ export default component$(() => {
       });
 
       if (response.ok) {
+        console.log(3);
         const data = await response.json();
+        console.log(data);
         await updateGameState({
           [building]: gameState.value.buildings[building] + 1,
         });
@@ -225,6 +230,7 @@ export default component$(() => {
   };
 
   useTask$(async () => {
+    console.log("On run");
     try {
       if (user.email) {
         const response = await fetch(
