@@ -260,6 +260,7 @@ export default component$(() => {
 
   const syncResources = $(async () => {
     if (!user.resources) return;
+    console.log("Starting sync resources");
 
     const migratedResources: any = {};
 
