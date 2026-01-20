@@ -4,6 +4,7 @@ import {
   useContext,
   useSignal,
   useTask$,
+  useVisibleTask$,
 } from "@builder.io/qwik";
 import { UserContext } from "~/context/UserContext";
 
@@ -308,6 +309,10 @@ export default component$(() => {
         console.error("Error saving cleaned resources:", error);
       }
     }
+  });
+
+  useVisibleTask$(() => {
+    syncResources();
   });
 
   return (
