@@ -233,6 +233,51 @@ export default component$(() => {
   useTask$(async () => {
     console.log("On run");
     try {
+      // 1) Try to load authenticated user from /auth/me (include cookies)
+      try {
+        const meResp = await fetch(`${baseURL}/api/auth/me`, {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (meResp.ok) {
+          const meJson = await meResp.json();
+          if (meJson.success && meJson.user) {
+            const serverUser = meJson.user;
+            // Initialize user context fields from server
+            if (serverUser.email) user.email = serverUser.email;
+            if (serverUser.coins !== undefined) user.coins = serverUser.coins;
+            if (serverUser.resources !== undefined) {
+              user.resources = serverUser.resources || {};
+            }
+            // If server returned gameState, merge into current gameState
+            if (serverUser.gameState) {
+              gameState.value = {
+                ...gameState.value,
+                buildings: {
+                  ...gameState.value.buildings,
+                  ...serverUser.gameState.buildings,
+                },
+                productionRates:
+                  serverUser.gameState.productionRates ??
+                  gameState.value.productionRates,
+                consumptionRates:
+                  serverUser.gameState.consumptionRates ??
+                  gameState.value.consumptionRates,
+                lastUpdate:
+                  serverUser.gameState.lastUpdate ?? gameState.value.lastUpdate,
+              };
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to fetch /auth/me:", err);
+      }
+
+      // 2) Fetch stored game state (still useful if /auth/me didn't include it)
       if (user.email) {
         const response = await fetch(
           `${baseURL}/api/game/state?userId=${user.email.toLowerCase()}`,
@@ -253,6 +298,7 @@ export default component$(() => {
           }
         }
       }
+
       await calculateRates();
     } catch (error) {
       console.error("Error loading game state:", error);
