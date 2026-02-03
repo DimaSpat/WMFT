@@ -230,81 +230,7 @@ export default component$(() => {
     return num.toString();
   };
 
-  useTask$(async () => {
-    console.log("On run");
-    try {
-      // 1) Try to load authenticated user from /auth/me (include cookies)
-      try {
-        const meResp = await fetch(`${baseURL}/api/auth/me`, {
-          method: "GET",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (meResp.ok) {
-          const meJson = await meResp.json();
-          if (meJson.success && meJson.user) {
-            const serverUser = meJson.user;
-            // Initialize user context fields from server
-            if (serverUser.email) user.email = serverUser.email;
-            if (serverUser.coins !== undefined) user.coins = serverUser.coins;
-            if (serverUser.resources !== undefined) {
-              user.resources = serverUser.resources || {};
-            }
-            // If server returned gameState, merge into current gameState
-            if (serverUser.gameState) {
-              gameState.value = {
-                ...gameState.value,
-                buildings: {
-                  ...gameState.value.buildings,
-                  ...serverUser.gameState.buildings,
-                },
-                productionRates:
-                  serverUser.gameState.productionRates ??
-                  gameState.value.productionRates,
-                consumptionRates:
-                  serverUser.gameState.consumptionRates ??
-                  gameState.value.consumptionRates,
-                lastUpdate:
-                  serverUser.gameState.lastUpdate ?? gameState.value.lastUpdate,
-              };
-            }
-          }
-        }
-      } catch (err) {
-        console.warn("Failed to fetch /auth/me:", err);
-      }
-
-      // 2) Fetch stored game state (still useful if /auth/me didn't include it)
-      if (user.email) {
-        const response = await fetch(
-          `${baseURL}/api/game/state?userId=${user.email.toLowerCase()}`,
-        );
-        if (response.ok) {
-          const data = await response.json();
-          if (data.gameState) {
-            gameState.value = {
-              ...gameState.value,
-              buildings: {
-                ...gameState.value.buildings,
-                ...data.gameState.buildings,
-              },
-            };
-
-            // Sync resources to remove duplicates and use lowercase consistently
-            await syncResources();
-          }
-        }
-      }
-
-      await calculateRates();
-    } catch (error) {
-      console.error("Error loading game state:", error);
-    }
-  });
-
+  // Move syncResources above the visible task so we can safely call it from the client task
   const syncResources = $(async () => {
     if (!user.resources) return;
     console.log("Starting sync resources");
@@ -354,6 +280,94 @@ export default component$(() => {
       } catch (error) {
         console.error("Error saving cleaned resources:", error);
       }
+    }
+  });
+
+  // Client-only initialization: fetch /auth/me and then load game state
+  useVisibleTask$(async () => {
+    console.log("Client visible task: loading /auth/me and game state");
+
+    // 1) Try to load authenticated user from /auth/me (include cookies)
+    try {
+      const meResp = await fetch(`${baseURL}/api/auth/me`, {
+        method: "GET",
+        credentials: "include", // ensure cookies are sent
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (meResp.ok) {
+        const meJson = await meResp.json();
+        if (meJson.success && meJson.user) {
+          const serverUser = meJson.user;
+          // Initialize user context fields from server
+          if (serverUser.email) user.email = serverUser.email;
+          if (serverUser.coins !== undefined) user.coins = serverUser.coins;
+          if (serverUser.resources !== undefined) {
+            user.resources = serverUser.resources || {};
+          }
+          // If server returned gameState, merge into current gameState
+          if (serverUser.gameState) {
+            gameState.value = {
+              ...gameState.value,
+              buildings: {
+                ...gameState.value.buildings,
+                ...serverUser.gameState.buildings,
+              },
+              productionRates:
+                serverUser.gameState.productionRates ??
+                gameState.value.productionRates,
+              consumptionRates:
+                serverUser.gameState.consumptionRates ??
+                gameState.value.consumptionRates,
+              lastUpdate:
+                serverUser.gameState.lastUpdate ?? gameState.value.lastUpdate,
+            };
+          }
+        } else {
+          console.warn("/auth/me returned no user", meJson);
+        }
+      } else {
+        console.warn("/auth/me failed with status", meResp.status);
+      }
+    } catch (err) {
+      console.warn("Failed to fetch /auth/me:", err);
+    }
+
+    // 2) Fetch stored game state (still useful if /auth/me didn't include it)
+    if (user.email) {
+      try {
+        const response = await fetch(
+          `${baseURL}/api/game/state?userId=${user.email.toLowerCase()}`,
+        );
+        if (response.ok) {
+          const data = await response.json();
+          if (data.gameState) {
+            gameState.value = {
+              ...gameState.value,
+              buildings: {
+                ...gameState.value.buildings,
+                ...data.gameState.buildings,
+              },
+            };
+
+            // Sync resources to remove duplicates and use lowercase consistently
+            await syncResources();
+          }
+        } else {
+          console.warn("/api/game/state failed:", response.status);
+        }
+      } catch (err) {
+        console.error("Error fetching /api/game/state:", err);
+      }
+    }
+
+    // 3) calculate rates once initialized
+    try {
+      await calculateRates();
+    } catch (err) {
+      console.error("Error calculating rates after init:", err);
     }
   });
 
