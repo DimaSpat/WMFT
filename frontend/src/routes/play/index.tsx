@@ -3,7 +3,6 @@ import {
   component$,
   useContext,
   useSignal,
-  useTask$,
   useVisibleTask$,
 } from "@builder.io/qwik";
 import { UserContext } from "~/context/UserContext";
