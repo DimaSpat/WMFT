@@ -80,7 +80,17 @@ export default component$(() => {
           }}
         >
           {/* Game preview content would go here */}
-          <h2 style={{ fontSize: "2rem" }}>Game Preview</h2>
+          <h2 style={{ fontSize: "2rem" }}>
+            <img
+              src="/gamepreview.png"
+              alt="Game Preview"
+              style={{
+                maxWidth: "100%",
+                maxHeight: "100%",
+                objectFit: "contain",
+              }}
+            />
+          </h2>
         </div>
 
         <div
@@ -152,19 +162,6 @@ export default component$(() => {
               a desktop computer, laptop, tablet, or smartphone, you can enjoy
               the game anytime, anywhere. The responsive design ensures that the
               game looks and plays great on all devices.
-            </p>
-          </div>
-
-          <div style={{ marginBottom: "2rem" }}>
-            <h3 style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>
-              Regular Updates and New Content
-            </h3>
-            <p style={{ fontSize: "1rem", color: "#666" }}>
-              The game receives regular updates with new content, features, and
-              improvements. This ensures that the game stays fresh and exciting,
-              and that players always have something new to look forward to.
-              Keep an eye out for new events, challenges, and seasonal updates
-              that will keep you engaged for months to come.
             </p>
           </div>
         </div>
