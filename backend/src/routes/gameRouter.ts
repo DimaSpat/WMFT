@@ -3,7 +3,65 @@ import { redisDB } from "../index";
 
 const gameRouter = new Hono();
 
-// Get game state for a user
+gameRouter.get("/leaderboard", async (c) => {
+  try {
+    const keys: string[] = (await redisDB.keys("user:*")) || [];
+
+    const entries: {
+      id: string;
+      email?: string;
+      coins: number;
+      resources: Record<string, number>;
+      castles: number;
+    }[] = [];
+
+    for (const key of keys) {
+      try {
+        const raw = await redisDB.get(key);
+        if (!raw) continue;
+        const u = JSON.parse(typeof raw === "string" ? raw : raw.toString());
+        entries.push({
+          id: key.replace(/^user:/, ""),
+          email: u.email,
+          coins: u.coins ?? 0,
+          resources: u.resources ?? {},
+          castles: u.gameState?.buildings?.castles ?? 0,
+        });
+      } catch (err) {
+        console.warn("leaderboard: failed to parse user", key, err);
+      }
+    }
+
+    const topN = (
+      arr: typeof entries,
+      selector: (p: (typeof entries)[number]) => number,
+    ) =>
+      arr
+        .map((p) => ({ id: p.id, email: p.email, value: selector(p) }))
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 10);
+
+    const resourceKeys = {
+      wheat: (p: (typeof entries)[number]) => p.resources?.wheat ?? 0,
+      wood: (p: (typeof entries)[number]) => p.resources?.wood ?? 0,
+      mineral: (p: (typeof entries)[number]) => p.resources?.mineral ?? 0,
+    };
+
+    const result: Record<string, any> = {
+      wheat: topN(entries, resourceKeys.wheat),
+      wood: topN(entries, resourceKeys.wood),
+      mineral: topN(entries, resourceKeys.mineral),
+      castles: topN(entries, (p) => p.castles),
+      coins: topN(entries, (p) => p.coins),
+    };
+
+    return c.json({ success: true, leaderboard: result });
+  } catch (err) {
+    console.error("Error building leaderboard:", err);
+    return c.json({ success: false, message: "Internal server error" }, 500);
+  }
+});
+
 gameRouter.get("/state", async (c) => {
   try {
     const userId = c.req.query("userId");
