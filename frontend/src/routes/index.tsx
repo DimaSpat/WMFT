@@ -79,18 +79,15 @@ export default component$(() => {
             marginBottom: "3rem",
           }}
         >
-          {/* Game preview content would go here */}
-          <h2 style={{ fontSize: "2rem" }}>
-            <img
-              src="/gamepreview.png"
-              alt="Game Preview"
-              style={{
-                maxWidth: "100%",
-                maxHeight: "100%",
-                objectFit: "contain",
-              }}
-            />
-          </h2>
+          <img
+            src="/gamepreview.png"
+            alt="Game Preview"
+            style={{
+              maxWidth: "100%",
+              maxHeight: "100%",
+              objectFit: "cover",
+            }}
+          />
         </div>
 
         <div
