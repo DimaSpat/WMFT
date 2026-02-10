@@ -5,7 +5,7 @@ const gameRouter = new Hono();
 
 gameRouter.get("/leaderboard", async (c) => {
   try {
-    const keys: string[] = (await redisDB.keys("user:*")) || [];
+    const keys = (await redisDB.keys("user:*")) || [];
 
     const entries: {
       id: string;
