@@ -72,20 +72,20 @@ export default component$(() => {
             borderRadius: "2rem",
             overflow: "hidden",
             color: "white",
-            padding: "2rem",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
             marginBottom: "3rem",
+            position: "relative",
           }}
         >
           <img
             src="/gamepreview.png"
             alt="Game Preview"
             style={{
-              maxWidth: "100%",
-              maxHeight: "100%",
+              width: "100%",
+              height: "100%",
               objectFit: "cover",
+              position: "absolute",
+              top: 0,
+              left: 0,
             }}
           />
         </div>
