@@ -5,7 +5,7 @@ const gameRouter = new Hono();
 
 gameRouter.get("/leaderboard", async (c) => {
   try {
-    const keys: string[] = (await redisDB.keys("user:*")) || [];
+    const keys = (await redisDB.keys("user:*")) || [];
 
     const entries: {
       id: string;
@@ -21,7 +21,10 @@ gameRouter.get("/leaderboard", async (c) => {
         if (!raw) continue;
         const u = JSON.parse(typeof raw === "string" ? raw : raw.toString());
         entries.push({
-          id: key.replace(/^user:/, ""),
+          id: (typeof key === "string" ? key : key.toString()).replace(
+            /^user:/,
+            "",
+          ),
           email: u.email,
           coins: u.coins ?? 0,
           resources: u.resources ?? {},
