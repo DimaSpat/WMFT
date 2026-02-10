@@ -1,4 +1,3 @@
-
 import { component$ } from "@builder.io/qwik";
 import { DocumentHead, Link } from "@builder.io/qwik-city";
 
@@ -84,7 +83,9 @@ export default component$(() => {
           <h2 style={{ fontSize: "2rem" }}>Game Preview</h2>
         </div>
 
-        <div style={{ textAlign: "center", maxWidth: "800px", margin: "0 auto" }}>
+        <div
+          style={{ textAlign: "center", maxWidth: "800px", margin: "0 auto" }}
+        >
           <h2 style={{ fontSize: "2rem", marginBottom: "1.5rem" }}>
             Why is this game good?
           </h2>
@@ -110,8 +111,8 @@ export default component$(() => {
               The trading system in this game is designed to be both challenging
               and rewarding. Prices fluctuate based on supply and demand, and
               players must make strategic decisions about when to buy and sell.
-              This creates a dynamic economy where players must adapt to changing
-              market conditions to maximize their profits.
+              This creates a dynamic economy where players must adapt to
+              changing market conditions to maximize their profits.
             </p>
           </div>
 
@@ -177,9 +178,8 @@ export const head: DocumentHead = {
   meta: [
     {
       name: "description",
-      content: "Wood Cutting Mining Farming Trading - A new game to become the richest player",
+      content:
+        "Wood Cutting Mining Farming Trading - A new game to become the richest player",
     },
   ],
 };
-
-}
