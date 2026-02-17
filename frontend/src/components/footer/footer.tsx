@@ -1,4 +1,5 @@
 import { component$ } from "@builder.io/qwik";
+import { Link } from "@builder.io/qwik-city";
 
 export const Footer = component$(() => {
   return (
@@ -8,9 +9,8 @@ export const Footer = component$(() => {
         bottom: 0,
         left: 0,
         width: "100%",
-        height: "3rem",
         display: "flex",
-        justifyContent: "center",
+        flexDirection: "column",
         alignItems: "center",
         padding: "1rem",
         backgroundColor: "rgba(245, 245, 245, 0.8)",
@@ -19,32 +19,60 @@ export const Footer = component$(() => {
     >
       <div
         style={{
-          display: "flex",
-          justifyContent: "space-between",
           width: "100%",
           maxWidth: "1200px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "1rem",
         }}
       >
-        <div>
-          <p style={{ fontSize: "0.9rem", color: "#666" }}>
-            © {new Date().getFullYear()} WMFT. All rights reserved.
+        {/* Navigation Links */}
+        <div
+          style={{
+            display: "flex",
+            gap: "1rem",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Link href="/" style={{ color: "#666", fontSize: "0.9rem" }}>
+            Home
+          </Link>
+          <span style={{ color: "#666" }}>|</span>
+          <Link href="/profile" style={{ color: "#666", fontSize: "0.9rem" }}>
+            Profile
+          </Link>
+          <span style={{ color: "#666" }}>|</span>
+          <Link href="/shop" style={{ color: "#666", fontSize: "0.9rem" }}>
+            Shop
+          </Link>
+          <span style={{ color: "#666" }}>|</span>
+          <Link href="/play" style={{ color: "#666", fontSize: "0.9rem" }}>
+            Portal
+          </Link>
+          <span style={{ color: "#666" }}>|</span>
+          <Link
+            href="/leaderboard"
+            style={{ color: "#666", fontSize: "0.9rem" }}
+          >
+            Leaderboard
+          </Link>
+        </div>
+
+        {/* Game Description */}
+        <div style={{ textAlign: "center", maxWidth: "800px" }}>
+          <p style={{ fontSize: "0.9rem", color: "#666", margin: "0" }}>
+            WMFT is a strategic resource management game where you gather wood,
+            mine minerals, farm wheat, and trade to become the richest player.
+            Compete with others on the global leaderboard and build your empire.
           </p>
         </div>
-        <div>
-          <p style={{ fontSize: "0.9rem", color: "#666" }}>
-            <a
-              href="/privacy"
-              style={{ color: "#666", textDecoration: "underline" }}
-            >
-              Privacy Policy
-            </a>{" "}
-            |{" "}
-            <a
-              href="/terms"
-              style={{ color: "#666", textDecoration: "underline" }}
-            >
-              Terms of Service
-            </a>
+
+        {/* Copyright */}
+        <div style={{ textAlign: "center" }}>
+          <p style={{ fontSize: "0.8rem", color: "#666", margin: "0" }}>
+            © {new Date().getFullYear()} WMFT. All rights reserved.
           </p>
         </div>
       </div>
