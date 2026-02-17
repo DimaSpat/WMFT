@@ -428,6 +428,11 @@ export default component$((): JSXOutput => {
                     cursor: "pointer",
                   }}
                 >
+                  <img
+                    src="https://raw.githubusercontent.com/tabler/tabler/main/core/img/social/telegram.svg"
+                    alt="Telegram"
+                    style={{ width: "1.2rem", height: "1.2rem" }}
+                  />
                   Telegram
                 </button>
               </a>
