@@ -9,6 +9,7 @@ import {
 } from "@builder.io/qwik";
 import { useNavigate } from "@builder.io/qwik-city";
 import { Header } from "~/components/header/header";
+import { Footer } from "~/components/footer/footer";
 import { UserContext, UserState } from "~/context/UserContext";
 
 export default component$(() => {
@@ -98,6 +99,7 @@ export default component$(() => {
           <main>
             <Slot></Slot>
           </main>
+          <Footer />
         </>
       )}
     </div>
