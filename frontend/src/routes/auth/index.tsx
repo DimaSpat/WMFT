@@ -406,6 +406,11 @@ export default component$((): JSXOutput => {
                     cursor: "pointer",
                   }}
                 >
+                  <img
+                    src="https://www.vectorlogo.zone/logos/google/google-icon.svg"
+                    alt="Google"
+                    style={{ width: "1.2rem", height: "1.2rem" }}
+                  />
                   Google
                 </button>
               </a>
