@@ -145,149 +145,286 @@ export default component$((): JSXOutput => {
   return (
     <div
       style={{
+        minHeight: "100vh",
+        backgroundColor: "#f5f5f5",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        height: "100vh",
+        padding: "2rem",
       }}
     >
+      {/* Card container */}
       <div
         style={{
-          borderRadius: "1rem",
-          border: "1px solid black",
+          width: "100%",
+          maxWidth: "400px",
+          backgroundColor: "white",
+          borderRadius: "10px",
+          boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
           overflow: "hidden",
-          width: "25%",
-          minWidth: "20rem",
         }}
       >
+        {/* Header tabs – Sign Up / Log In */}
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
-            height: "4rem",
+            display: "flex",
+            backgroundColor: "#4a6fa5",
+            color: "white",
           }}
         >
           <button
             onClick$={changeAuthState}
             disabled={isSigning.value}
             style={{
-              background: isSigning.value ? "green" : "red",
+              flex: 1,
+              padding: "1rem",
               border: "none",
+              backgroundColor: isSigning.value ? "#3a5a8f" : "#4a6fa5",
               cursor: !isSigning.value ? "pointer" : "not-allowed",
             }}
           >
-            Sign In
+            Sign Up
           </button>
           <button
             onClick$={changeAuthState}
             disabled={!isSigning.value}
             style={{
-              background: !isSigning.value ? "green" : "red",
+              flex: 1,
+              padding: "1rem",
               border: "none",
+              backgroundColor: !isSigning.value ? "#3a5a8f" : "#4a6fa5",
               cursor: isSigning.value ? "pointer" : "not-allowed",
             }}
           >
             Log In
           </button>
         </div>
-        <div>
-          <div
-            style={{
-              borderBottom: "2px dotted black",
-            }}
-          >
-            {isSigning.value ? (
-              <>
-                <p>Register to start playing</p>
-                <form
-                  ref={formRef}
-                  onSubmit$={submitForm}
-                  preventdefault:submit={true}
-                >
-                  <input type="email" name="email" required={true} />
-                  <input type="password" name="password" required={true} />
-                  <input type="password" name="passwordCheck" required={true} />
-                  <button type="submit" disabled={isLoading.value}>
-                    {isLoading.value ? "Loading..." : "Create Account"}
-                  </button>
-                </form>
-                {result.value && (
-                  <div>
-                    <p
-                      style={{
-                        color: !result.value?.success
-                          ? "red"
-                          : result.value?.success
-                            ? "green"
-                            : "black",
-                      }}
-                    >
-                      {result.value?.message}
-                    </p>
-                  </div>
-                )}
-              </>
-            ) : (
-              <>
-                <p>Log back to your progress</p>
-                <form
-                  ref={formRef}
-                  onSubmit$={submitForm}
-                  preventdefault:submit={true}
-                >
-                  <input type="email" name="email" required={true} />
-                  <input type="password" name="password" required={true} />
-                  <button type="submit" disabled={isLoading.value}>
-                    {isLoading.value ? "Loading..." : "Create Account"}
-                  </button>
-                </form>
-                {result.value && (
-                  <div>
-                    <p
-                      style={{
-                        color: !result.value?.success
-                          ? "red"
-                          : result.value?.success
-                            ? "green"
-                            : "black",
-                      }}
-                    >
-                      {result.value?.message}
-                    </p>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-          <div>
-            <a href={API_ENDPOINTS.GOOGLE}>
-              <button
+
+        {/* Form body */}
+        <div style={{ padding: "2rem" }}>
+          {isSigning.value ? (
+            <>
+              <h2
                 style={{
-                  background: "#0F9D58",
-                  color: "white",
-                  border: "none",
-                  padding: "0.5rem 1rem",
-                  borderRadius: "0.5rem",
-                  cursor: "pointer",
+                  textAlign: "center",
+                  marginBottom: "1rem",
+                  color: "#333",
                 }}
               >
-                Continue with Google
-              </button>
-            </a>
-            <a href={API_ENDPOINTS.TELEGRAM}>
-              <button
+                Create Account
+              </h2>
+              <p
                 style={{
-                  background: "#229ED9",
-                  color: "white",
-                  border: "none",
-                  padding: "0.5rem 1rem",
-                  borderRadius: "0.5rem",
-                  cursor: "pointer",
+                  textAlign: "center",
+                  marginBottom: "1.5rem",
+                  color: "#666",
                 }}
               >
-                Continue with Telegram
-              </button>
-            </a>
+                Join WMFT and start your adventure
+              </p>
+              <form
+                ref={formRef}
+                onSubmit$={submitForm}
+                preventdefault:submit={true}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "1rem",
+                }}
+              >
+                <label style={{ fontWeight: "bold", color: "#333" }}>
+                  Email
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  required
+                  style={{
+                    padding: "0.75rem",
+                    border: "1px solid #ddd",
+                    borderRadius: "5px",
+                  }}
+                />
+                <label style={{ fontWeight: "bold", color: "#333" }}>
+                  Password
+                </label>
+                <input
+                  type="password"
+                  name="password"
+                  required
+                  style={{
+                    padding: "0.75rem",
+                    border: "1px solid #ddd",
+                    borderRadius: "5px",
+                  }}
+                />
+                <label style={{ fontWeight: "bold", color: "#333" }}>
+                  Confirm Password
+                </label>
+                <input
+                  type="password"
+                  name="passwordCheck"
+                  required
+                  style={{
+                    padding: "0.75rem",
+                    border: "1px solid #ddd",
+                    borderRadius: "5px",
+                  }}
+                />
+                <button
+                  type="submit"
+                  disabled={isLoading.value}
+                  style={{
+                    padding: "0.75rem",
+                    backgroundColor: "#4a6fa5",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "5px",
+                    fontWeight: "bold",
+                    cursor: "pointer",
+                  }}
+                >
+                  {isLoading.value ? "Processing…" : "Create Account"}
+                </button>
+              </form>
+            </>
+          ) : (
+            <>
+              <h2
+                style={{
+                  textAlign: "center",
+                  marginBottom: "1rem",
+                  color: "#333",
+                }}
+              >
+                Welcome Back
+              </h2>
+              <p
+                style={{
+                  textAlign: "center",
+                  marginBottom: "1.5rem",
+                  color: "#666",
+                }}
+              >
+                Log in to continue your adventure
+              </p>
+              <form
+                ref={formRef}
+                onSubmit$={submitForm}
+                preventdefault:submit={true}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "1rem",
+                }}
+              >
+                <label style={{ fontWeight: "bold", color: "#333" }}>
+                  Email
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  required
+                  style={{
+                    padding: "0.75rem",
+                    border: "1px solid #ddd",
+                    borderRadius: "5px",
+                  }}
+                />
+                <label style={{ fontWeight: "bold", color: "#333" }}>
+                  Password
+                </label>
+                <input
+                  type="password"
+                  name="password"
+                  required
+                  style={{
+                    padding: "0.75rem",
+                    border: "1px solid #ddd",
+                    borderRadius: "5px",
+                  }}
+                />
+                <button
+                  type="submit"
+                  disabled={isLoading.value}
+                  style={{
+                    padding: "0.75rem",
+                    backgroundColor: "#4a6fa5",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "5px",
+                    fontWeight: "bold",
+                    cursor: "pointer",
+                  }}
+                >
+                  {isLoading.value ? "Logging in…" : "Log In"}
+                </button>
+              </form>
+            </>
+          )}
+
+          {/* Result message */}
+          {result.value && (
+            <div
+              style={{
+                marginTop: "1rem",
+                padding: "0.75rem",
+                backgroundColor: result.value.success ? "#d4edda" : "#f8d7da",
+                borderRadius: "5px",
+              }}
+            >
+              <p
+                style={{
+                  margin: 0,
+                  color: result.value.success ? "#155724" : "#721c24",
+                  textAlign: "center",
+                }}
+              >
+                {result.value.message}
+              </p>
+            </div>
+          )}
+
+          {/* Social login */}
+          <div style={{ marginTop: "2rem", textAlign: "center" }}>
+            <p style={{ marginBottom: "0.5rem", color: "#666" }}>
+              Or continue with
+            </p>
+            <div
+              style={{ display: "flex", gap: "1rem", justifyContent: "center" }}
+            >
+              <a href={API_ENDPOINTS.GOOGLE} style={{ textDecoration: "none" }}>
+                <button
+                  style={{
+                    background: "#4285F4",
+                    color: "white",
+                    border: "none",
+                    padding: "0.5rem 1rem",
+                    borderRadius: "5px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Google
+                </button>
+              </a>
+              <a
+                href={API_ENDPOINTS.TELEGRAM}
+                style={{ textDecoration: "none" }}
+              >
+                <button
+                  style={{
+                    background: "#0088cc",
+                    color: "white",
+                    border: "none",
+                    padding: "0.5rem 1rem",
+                    borderRadius: "5px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Telegram
+                </button>
+              </a>
+            </div>
           </div>
         </div>
       </div>
