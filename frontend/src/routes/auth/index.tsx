@@ -179,6 +179,7 @@ export default component$((): JSXOutput => {
               flex: 1,
               padding: "1rem",
               border: "none",
+              color: "white",
               backgroundColor: isSigning.value ? "#3a5a8f" : "#4a6fa5",
               cursor: !isSigning.value ? "pointer" : "not-allowed",
             }}
@@ -192,6 +193,7 @@ export default component$((): JSXOutput => {
               flex: 1,
               padding: "1rem",
               border: "none",
+              color: "white",
               backgroundColor: !isSigning.value ? "#3a5a8f" : "#4a6fa5",
               cursor: isSigning.value ? "pointer" : "not-allowed",
             }}
