@@ -80,7 +80,6 @@ const handleAuthError: any = (): AuthResult => ({
 
 export default component$((): JSXOutput => {
   const nav = useNavigate();
-  const user = useStore<UserState>({});
   const isSigning: Signal<boolean> = useSignal(true);
   const isLoading: Signal<boolean> = useSignal(false);
   const formRef: Signal<HTMLFormElement | undefined> =
