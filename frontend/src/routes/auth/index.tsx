@@ -132,19 +132,9 @@ export default component$((): JSXOutput => {
       if (responseData.success && isBrowser) {
         if (isSigning.value) {
           if (responseData.token) {
-            const sameSite = "None";
-            const secure = true;
-            const cookieParts = [
-              `token=${responseData.token}`,
-              "Path=/",
-              `sameSite=${sameSite}`,
-              secure ? "Secure" : "",
-            ]
-              .filter(Boolean)
-              .join("; ");
-
-            document.cookie = cookieParts;
+            document.cookie = `token=${responseData.token}; path=/; SameSite=None; Secure`;
           }
+
           nav("/play");
         } else {
           // changeAuthState();
