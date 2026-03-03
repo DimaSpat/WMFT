@@ -5,8 +5,10 @@ import {
   Signal,
   useSignal,
   isBrowser,
+  useStore,
 } from "@builder.io/qwik";
 import { DocumentHead, useNavigate } from "@builder.io/qwik-city";
+import { UserState } from "~/context/UserContext";
 
 export const head: DocumentHead = {
   title: "Authentication",
@@ -78,6 +80,7 @@ const handleAuthError: any = (): AuthResult => ({
 
 export default component$((): JSXOutput => {
   const nav = useNavigate();
+  const user = useStore<UserState>({});
   const isSigning: Signal<boolean> = useSignal(true);
   const isLoading: Signal<boolean> = useSignal(false);
   const formRef: Signal<HTMLFormElement | undefined> =
@@ -128,9 +131,23 @@ export default component$((): JSXOutput => {
 
       if (responseData.success && isBrowser) {
         if (isSigning.value) {
+          if (responseData.token) {
+            const sameSite = "None";
+            const secure = true;
+            const cookieParts = [
+              `token=${responseData.token}`,
+              "Path=/",
+              `sameSite=${sameSite}`,
+              secure ? "Secure" : "",
+            ]
+              .filter(Boolean)
+              .join("; ");
+
+            document.cookie = cookieParts;
+          }
           nav("/play");
         } else {
-          changeAuthState();
+          // changeAuthState();
           result.value = responseData;
         }
       } else {
