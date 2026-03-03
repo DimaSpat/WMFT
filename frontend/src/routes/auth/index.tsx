@@ -128,6 +128,9 @@ export default component$((): JSXOutput => {
 
       if (responseData.success && isBrowser) {
         if (isSigning.value) {
+          if (responseData.token) {
+            document.cookie = `token=${responseData.token}; path=/; SameSite=None; Secure`;
+          }
           nav("/play");
         } else {
           // changeAuthState();
