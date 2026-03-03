@@ -132,6 +132,8 @@ export default component$((): JSXOutput => {
             document.cookie = `token=${responseData.token}; path=/; SameSite=None; Secure`;
           }
 
+          window.location.reload();
+
           nav("/play");
         } else {
           // changeAuthState();
