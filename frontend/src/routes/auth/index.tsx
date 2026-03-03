@@ -130,7 +130,7 @@ export default component$((): JSXOutput => {
         if (isSigning.value) {
           nav("/play");
         } else {
-          changeAuthState();
+          // changeAuthState();
           result.value = responseData;
         }
       } else {
