@@ -38,6 +38,7 @@ export default component$(() => {
   //  eslint-disable-next-line qwik/no-use-visible-task
   useVisibleTask$(async ({ track }) => {
     track(() => window.location.pathname);
+    track(() => document.cookie);
 
     try {
       const localToken = localStorage.getItem("auth_token");
