@@ -5,10 +5,8 @@ import {
   Signal,
   useSignal,
   isBrowser,
-  useStore,
 } from "@builder.io/qwik";
 import { DocumentHead, useNavigate } from "@builder.io/qwik-city";
-import { UserState } from "~/context/UserContext";
 
 export const head: DocumentHead = {
   title: "Authentication",
