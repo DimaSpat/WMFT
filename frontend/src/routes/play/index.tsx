@@ -377,7 +377,12 @@ export default component$(() => {
   return (
     <div style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
       <h1
-        style={{ textAlign: "center", fontSize: "3rem", marginBottom: "2rem" }}
+        style={{
+          textAlign: "center",
+          fontSize: "3rem",
+          marginBottom: "2rem",
+          marginTop: "2rem",
+        }}
       >
         {" "}
         Kingdom Builder

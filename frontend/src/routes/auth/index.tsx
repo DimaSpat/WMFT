@@ -6,7 +6,7 @@ import {
   useSignal,
   isBrowser,
 } from "@builder.io/qwik";
-import { DocumentHead } from "@builder.io/qwik-city";
+import { DocumentHead, useNavigate } from "@builder.io/qwik-city";
 
 export const head: DocumentHead = {
   title: "Authentication",
@@ -77,6 +77,7 @@ const handleAuthError: any = (): AuthResult => ({
 });
 
 export default component$((): JSXOutput => {
+  const nav = useNavigate();
   const isSigning: Signal<boolean> = useSignal(true);
   const isLoading: Signal<boolean> = useSignal(false);
   const formRef: Signal<HTMLFormElement | undefined> =
@@ -127,7 +128,7 @@ export default component$((): JSXOutput => {
 
       if (responseData.success && isBrowser) {
         if (isSigning.value) {
-          window.location.href = "/";
+          nav("/play");
         } else {
           changeAuthState();
           result.value = responseData;
